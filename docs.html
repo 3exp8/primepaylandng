@@ -19,6 +19,45 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://prime-pay-landing.pages.dev/#organization",
+      "name": "Prime Fast Pay",
+      "url": "https://prime-pay-landing.pages.dev/"
+    },
+    {
+      "@type": "TechArticle",
+      "headline": "Prime Fast Pay API Reference",
+      "description": "Authentication, payouts, recipients, webhooks, and the native MCP server. Sandbox keys ready in minutes.",
+      "author": {"@id": "https://prime-pay-landing.pages.dev/#organization"},
+      "publisher": {"@id": "https://prime-pay-landing.pages.dev/#organization"},
+      "proficiencyLevel": "Intermediate",
+      "about": ["Payments API", "ACH", "RTP", "FedNow", "SEPA", "SWIFT", "MCP", "Model Context Protocol"]
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Prime Fast Pay",
+      "applicationCategory": "FinanceApplication",
+      "applicationSubCategory": "Payment API",
+      "operatingSystem": "Any (Cloud)",
+      "description": "REST API and native MCP server for outbound payouts. 9 payment rails, sub-second settlement, idempotent writes.",
+      "url": "https://prime-pay-landing.pages.dev/",
+      "softwareRequirements": "HTTPS client",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "category": "Free sandbox"
+      }
+    }
+  ]
+}
+</script>
 <style>
   :root{
     --ink:#0A0D12;
@@ -50,6 +89,21 @@
   a{color:inherit;text-decoration:none;}
   ::selection{background:var(--gold);color:var(--ink);}
   :focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:4px;}
+  .skip-link{
+    position:absolute;
+    left:12px;
+    top:12px;
+    padding:10px 16px;
+    background:var(--gold);
+    color:var(--ink);
+    font-weight:600;
+    font-size:14px;
+    border-radius:8px;
+    transform:translateY(-200%);
+    transition:transform .15s ease;
+    z-index:100;
+  }
+  .skip-link:focus{transform:translateY(0);outline:none;}
   code{font-family:var(--mono);}
 
   /* ---------- TOP BAR ---------- */
@@ -311,6 +365,8 @@
 </style>
 </head>
 <body>
+
+<a href="#main" class="skip-link">Skip to content</a>
 
 <div class="topbar">
   <a href="index.html" class="logo">

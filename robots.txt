@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
 
+# LLM crawlers — point them at the structured summary and the full corpus
+# llm.txt is the proposed standard for AI crawler discoverability.
+# llms-full.txt is the full plain-text dump for assistants that want the entire corpus.
+
 Sitemap: https://prime-pay-landing.pages.dev/sitemap.xml
+LLM-Txt: https://prime-pay-landing.pages.dev/llm.txt
+LLM-Full: https://prime-pay-landing.pages.dev/llms-full.txt
