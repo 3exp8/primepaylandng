@@ -1,0 +1,903 @@
+# Prime Fast Pay — Full Site Content
+
+> A complete, plain-text dump of all public pages on prime-pay-landing.pages.dev. Intended for AI assistants and crawlers that want the full corpus in one fetch.
+
+Source pages:
+
+- `index.html`
+- `primepay-landing.html`
+- `docs.html`
+
+---
+
+## Prime Fast Pay — Main Landing Page
+
+Prime Fast Pay — Money moves at AI Agent speed
+Prime Fast Pay
+Agents
+Rails
+Platform
+Security
+Who it's for
+Docs
+Read the docs
+Get API access
+Works with Google ADK, Claude Agent SDK, CrewAI, LangChain, Open Claw
+## Money moves at AI Agent speed.
+Tell your agent to send the money. Prime Fast Pay picks the rail, runs the checks, and settles in seconds.
+Get API access
+See the agent stack
+$ prime-fast-pay-mcp · create_payout → confirmed in <30s · no batch files, no T+3 wait
+API p95 latency
+<250ms
+Instant-rail confirm
+<30s
+Rails, one API
+9
+Reconciliation
+Automatic
+<250ms
+API response time, p95, at 5,000 req/s sustained
+<30s
+Payout confirmation on real-time rails, p95
+9
+Payment rails behind a single API
+160+
+Countries reachable by international wire
+AI agent integrations
+## Don't call the API. Tell an agent to.
+Prime Fast Pay ships a native MCP server that exposes every endpoint as a typed tool. Point any MCP-speaking agent framework at it and let the model handle the call — no glue code, no per-SDK adapters to maintain.
+cargo install prime-fast-pay-mcp
+export PRIME_FAST_PAY_API_KEY=sk_live_xxxxxxxx
+create_payout
+retrieve_payout
+list_payouts
+cancel_payout
+create_recipient
+retrieve_recipient
+list_recipients
+CA
+## Claude Agent SDK
+A managed agent loop with MCP access built in — no prompt orchestration to write yourself.
+LC
+## LangChain / LangGraph
+Loads Prime Fast Pay tools through langchain-mcp-adapters into a React agent.
+GA
+## Google ADK
+An McpToolset drops the tools straight into a Gemini-powered agent on Vertex AI.
+CR
+## CrewAI
+Wire payouts into any role-based crew with MCPServerAdapter — no custom tool classes.
+⚠ Use an sk_test_ key while iterating — it routes to the sandbox and never moves real money. Switch keys before letting an agent run unattended.
+agent.py
+```
+# Claude Agent SDK — agent.py
+options = ClaudeAgentOptions(
+mcp_servers={
+"prime-fast-pay": {
+"command": "prime-fast-pay-mcp",
+"env": {"PRIME_FAST_PAY_API_KEY": "sk_live_xxxxxxxx"}
+}
+},
+allowed_tools=["mcp__prime-fast-pay__*"],
+system_prompt="You send payouts. Always confirm the
+recipient, amount, and method before calling create_payout."
+)
+async for message in query(
+prompt="Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP
+for invoice #4421.",
+options=options
+):
+if message["type"] == "result":
+print(message["result"])
+# → Confirmed: po_4k29dLmz, $250.00 via RTP,
+# submitted to rec_9x8y7z6w5v4u
+```
+Why teams switch
+## Built to replace the batch file, not sit next to it.
+Corporate banking portals move money on their own schedule. Prime Fast Pay moves it on yours — with the status, control, and reach a real disbursement program needs.
+Speed
+## Seconds, not days
+Payouts move in seconds on instant rails — FedNow, RTP, SEPA Instant, Visa Direct — and same-day everywhere else. No T+1 to T+3 wait.
+Reach
+## One integration, every rail
+Send to any supported rail and currency without opening a new banking relationship for every corridor you enter.
+Reliability
+## Retries and reroutes on its own
+If a rail degrades, Prime Fast Pay falls back automatically, so a temporary outage on one network doesn't leave a payout stuck.
+Transparency
+## You always know where a payout is
+Real-time status, granular reporting, and role-based approvals replace the opaque batch files of a banking portal.
+Coverage
+## Pick the rail. We handle the rest.
+Every rail is reachable through the same request shape. Route by currency, speed, and destination — Prime Fast Pay picks the corridor and falls back automatically if one is unavailable.
+Routing engine
+## One endpoint. Nine rails. Live now.
+A single POST /v1/payouts arrives, the routing engine picks the cheapest instant rail for that corridor, and the funds leave. If a rail degrades mid-flight, the packet reroutes instead of stalling.
+●Corridor scoring
+●Auto-fallback
+●Per-rail webhooks
+Disbursement routing
+live
+ACH
+RTP
+FedNow
+SEPA
+SWIFT
+Cards
+Prime Fast Pay
+Recipient
+POST /v1/payouts
+RailSpeedIndicative feeCoverage
+ACH (Standard & Same-Day)1–2 business days$0.25United States
+RTPSeconds, 24/7$0.50United States
+FedNowSeconds, 24/7$0.50United States
+Push-to-CardMinutes1.5% of amountUS, CA, UK
+Virtual Card IssuanceInstant$1.00US, CA
+Digital Check1–3 business days$0.50United States
+International Wire (SWIFT)Same day$15.00160+ countries
+SEPA SCTNext business day€0.20SEPA zone
+SEPA InstantSeconds, 24/7€0.30SEPA zone
+● gold marker = settles in seconds, 24/7 · fees indicative, corridor pricing on request
+Architecture
+## Three layers, one payout lifecycle.
+Every instruction moves through the same disciplined path — validated, screened, reserved against a ledger, routed, and reconciled — regardless of which rail it lands on, and regardless of whether a human or an agent sent it.
+01 · Orchestration
+## Payout orchestration layer
+Receives each instruction, validates it, reserves funds against the ledger, selects the best rail, and tracks the payout through to confirmation — behind one uniform interface.
+02 · Interface
+## Merchant & agent interface layer
+A REST API and SDKs for automated flows, an MCP server for agent frameworks, a dashboard for manual payouts and approvals, and webhooks that keep your systems synced with every status change.
+03 · Compliance
+## Compliance, risk & reconciliation
+Recipient verification, sanctions screening, and velocity limits run before funds are ever reserved. Settlement is reconciled automatically against every rail's reports.
+●Event-driven & auditable
+●Ledger as source of truth
+●Rail-agnostic by design
+●Zero-trust networking
+●Multi-region, active-passive
+How it works
+## Five steps, in the order they actually happen.
+This is the real sequence a payout moves through — nothing here is reordered for a pitch.
+01
+## Instruction received
+A typed request lands from your backend, the dashboard, or an agent calling create_payout over MCP. The same validation runs either way — an agent gets no shortcut past it.
+02
+## Screening runs first
+Recipient verification, sanctions and PEP screening, and velocity limits execute before a single cent is reserved. The payout cannot advance until they clear — that ordering is enforced by the code path, not documented in a runbook.
+03
+## Funds reserved on the ledger
+The amount posts to a double-entry ledger tied to your account. A balance is never just a number in a row — it's the sum of entries you can always trace back.
+04
+## Rail selected and routed
+Funds leave on whichever rail is fastest and cheapest for that currency and destination at that moment. If it degrades mid-flight, the payout reroutes instead of getting stuck.
+05
+## Confirmed and reconciled
+Webhooks fire on every state change, and settlement is reconciled automatically against each rail's own reports — so month end is a report you read, not a spreadsheet you build.
+Developer experience
+## A payout is one request away.
+Send an instruction, get a payout object back, and watch it move through status via webhook — no rail-specific formatting to learn.
+- 01Free sandbox, no card required. Full API functionality — most engineers send a first test payout in under an hour.
+- 02SDKs for iOS, Android, Flutter, and REST. Recipient bank details are tokenized in the SDK, so sensitive data never touches your servers.
+- 03Webhooks for every state change. payout.created, payout.processing, payout.completed, payout.failed.
+- 04Integration engineering support. Available at no cost to qualified teams during evaluation.
+POST /v1/payouts
+```
+// Create a payout
+POST /v1/payouts
+Host: api.primefastpay.com
+Authorization: Bearer sk_live_xxxxxxxx
+Idempotency-Key: 3b1e9c2f-6a0b-4f5d
+{
+"amount": 250000,
+"currency": "USD",
+"recipient_id": "rec_9x8y7z6w",
+"method": "rtp",
+"description": "Invoice #4421"
+}
+// Response
+{
+"id": "po_4k29dLmz",
+"status": "submitted",
+"eta": "2026-08-17T14:02:31Z"
+}
+```
+Trust & controls
+## Handled like it needs to survive an audit — because it does.
+Prime Fast Pay is built with the controls a payout gateway needs, not the ones a checkout page can get away with.
+◆
+## Segregated merchant funds
+Merchant balances sit in accounts structurally separate from Prime Fast Pay's operating funds, reconciled daily.
+✓
+## Screening before every reserve
+Sanctions, PEP, and fraud checks run on every instruction before funds are ever reserved — not as an afterthought.
+⇄
+## Zero-trust networking
+Mutual TLS on every service-to-service call. No compute instance carries a public IP.
+■
+## Encrypted, key-managed
+AES-256-GCM at rest, TLS 1.3 in transit, ledger data protected with HSM-backed keys.
+▲
+## Multi-region by default
+Active-passive deployment across primary and disaster-recovery regions, tested with quarterly failover exercises.
+≡
+## Full audit trail
+Every payout's lifecycle is preserved as an immutable event, so any transaction can be reconstructed end-to-end.
+⌘
+## Scoped agent keys
+An sk_test_ key routes to the sandbox and never moves real money. Production keys can be scoped per tool, per amount ceiling.
+◷
+## Human-in-the-loop approvals
+Role-based approval thresholds hold an agent-initiated payout for sign-off above whatever limit you set.
+⊘
+## Idempotent by contract
+Every write takes an idempotency key, so a retrying agent can't double-send a payout.
+Who it's for
+## Built for platforms that pay a lot of people.
+If your business sends payouts to a distributed base of recipients rather than accepting payments from them, Prime Fast Pay is built around your problem.
+01
+## Marketplaces & platforms
+02
+## Gig & creator economy
+03
+## Affiliate & ad-tech networks
+04
+## Insurance carriers
+05
+## Brokerages & fintechs
+06
+## Corporate contractor payments
+Get started
+## Send your first payout today.
+Spin up a sandbox in minutes, or talk to our team about your corridors, volume, and rollout. Production access needs a short compliance conversation first.
+Start in the sandbox
+Read the docs
+Prime Fast Pay
+Agents
+Rails
+Platform
+Security
+Docs
+Support
+© 2026 Prime Fast Pay. A payout gateway platform — outbound disbursements only, no card acceptance, no checkout. Built on typestate-safe rails.
+
+---
+
+## PrimePay — Alternate Landing Page
+
+PrimePay — Every rail. One API.
+PrimePay
+Rails
+Platform
+Agents
+Security
+Who it's for
+Docs
+Talk to sales
+Get API keys
+Payout infrastructure
+## Every rail.
+One API.
+Funds land where you send them.
+PrimePay routes payouts across ACH, RTP, FedNow, SEPA, SWIFT, and card networks through a single integration and a single dashboard — so you stop maintaining banking relationships and start shipping disbursements.
+Read the docs
+Talk to sales
+$ POST /v1/payouts · no batch files · no T+3 wait
+Disbursement routing
+live
+ACH
+RTP
+FedNow
+SEPA
+SWIFT
+Cards
+PrimePay
+Recipient
+<250ms
+API response time, p95, at 5,000 req/s sustained
+<30s
+Payout confirmation on real-time rails, p95
+9
+Payment rails behind a single API
+160+
+Countries reachable by international wire
+Why teams switch
+## Built to replace the batch file, not sit next to it.
+Corporate banking portals move money on their own schedule. PrimePay moves it on yours — with the status, control, and reach that a real disbursement program needs.
+Speed
+## Seconds, not days
+Payouts move in seconds on instant rails — FedNow, RTP, SEPA Instant, Visa Direct — and same-day everywhere else. No T+1 to T+3 wait.
+Reach
+## One integration, every rail
+Send to any supported rail and currency without opening a new banking relationship for every corridor you enter.
+Reliability
+## Retries and reroutes on its own
+If a rail degrades, PrimePay falls back automatically, so a temporary outage on one network doesn't leave a payout stuck.
+Transparency
+## You always know where a payout is
+Real-time status, granular reporting, and role-based approvals replace the opaque batch files of a banking portal.
+Coverage
+## Pick the rail. We handle the rest.
+Every rail is reachable through the same request shape. Route by currency, speed, and destination — PrimePay picks the corridor and falls back automatically if one is unavailable.
+RailSpeedIndicative feeCoverage
+ACH (Standard & Same-Day)1–2 business days$0.25United States
+RTPSeconds, 24/7$0.50United States
+FedNowSeconds, 24/7$0.50United States
+Push-to-CardMinutes1.5% of amountUS, CA, UK
+Virtual Card IssuanceInstant$1.00US, CA
+Digital Check1–3 business days$0.50United States
+International Wire (SWIFT)Same day$15.00160+ countries
+SEPA SCTNext business day€0.20SEPA zone
+SEPA InstantSeconds, 24/7€0.30SEPA zone
+How it works
+## Three layers, one payout lifecycle.
+Every instruction moves through the same disciplined path — validated, screened, reserved against a ledger, routed, and reconciled — regardless of which rail it lands on.
+01 · Orchestration
+## Payout orchestration layer
+Receives each instruction, validates it, reserves funds against the ledger, selects the best rail, and tracks the payout through to confirmation — behind one uniform interface.
+02 · Interface
+## Merchant interface layer
+A REST API and SDKs for automated flows, a dashboard for manual payouts and approvals, and webhooks that keep your systems synced with every status change.
+03 · Compliance
+## Compliance, risk & reconciliation
+Recipient verification, sanctions screening, and velocity limits run before funds are ever reserved. Settlement is reconciled automatically against every rail's reports.
+●Event-driven & auditable
+●Ledger as source of truth
+●Rail-agnostic by design
+●Zero-trust networking
+●Multi-region, active-passive
+Developer experience
+## A payout is one request away.
+Send an instruction, get a payout object back, and watch it move through status via webhook — no rail-specific formatting to learn.
+- 01Free sandbox, no card required. Full API functionality — most engineers send a first test payout in under an hour.
+- 02SDKs for iOS, Android, Flutter, and REST. Recipient bank details are tokenized in the SDK, so sensitive data never touches your servers.
+- 03Webhooks for every state change. payout.created, payout.processing, payout.completed, payout.failed.
+- 04Integration engineering support. Available at no cost to qualified teams during evaluation.
+```
+// Create a payout
+POST /v1/payouts
+Host: api.primepay.com
+Authorization: Bearer sk_live_xxxxxxxx
+Idempotency-Key: 3b1e9c2f-6a0b-4f5d
+{
+"amount": 250000,
+"currency": "USD",
+"recipient_id": "rec_9x8y7z6w",
+"method": "rtp",
+"description": "Invoice #4421"
+}
+// Response
+{
+"id": "po_4k29dLmz",
+"status": "submitted",
+"eta": "2026-08-17T14:02:31Z"
+}
+```
+AI agent integrations
+## Don't call the API. Tell an agent to.
+PrimePay ships a native MCP server that exposes every endpoint as a typed tool. Point any MCP-speaking agent framework at it and let the model handle the call — no glue code, no per-SDK adapters to maintain.
+cargo install prime-fast-pay-mcp
+export PRIME_FAST_PAY_API_KEY=sk_live_xxxxxxxx
+create_payout
+retrieve_payout
+list_payouts
+cancel_payout
+create_recipient
+retrieve_recipient
+list_recipients
+CA
+## Claude Agent SDK
+A managed agent loop with MCP access built in — no prompt orchestration to write yourself.
+LC
+## LangChain / LangGraph
+Loads Prime Fast Pay tools through langchain-mcp-adapters into a React agent.
+GA
+## Google ADK
+An McpToolset drops the tools straight into a Gemini-powered agent on Vertex AI.
+CR
+## CrewAI
+Wire payouts into any role-based crew with MCPServerAdapter — no custom tool classes.
+⚠ Use an sk_test_ key while iterating — it routes to the sandbox and never moves real money. Switch keys before letting an agent run unattended.
+```
+# Claude Agent SDK — agent.py
+options = ClaudeAgentOptions(
+mcp_servers={
+"prime-fast-pay": {
+"command": "prime-fast-pay-mcp",
+"env": {"PRIME_FAST_PAY_API_KEY": "sk_live_xxxxxxxx"}
+}
+},
+allowed_tools=["mcp__prime-fast-pay__*"],
+system_prompt="You send payouts. Always confirm the
+recipient, amount, and method before calling create_payout."
+)
+async for message in query(
+prompt="Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP
+for invoice #4421.",
+options=options
+):
+if message["type"] == "result":
+print(message["result"])
+# → Confirmed: po_4k29dLmz, $250.00 via RTP,
+# submitted to rec_9x8y7z6w5v4u
+```
+Trust & controls
+## Handled like it needs to survive an audit — because it does.
+PrimePay is built with the controls a payout gateway needs, not the ones a checkout page can get away with.
+◆
+## Segregated Merchant funds
+Merchant balances sit in accounts structurally separate from PrimePay's operating funds, reconciled daily.
+✓
+## Screening before every reserve
+Sanctions, PEP, and fraud checks run on every instruction before funds are ever reserved — not as an afterthought.
+⇄
+## Zero-trust networking
+Mutual TLS on every service-to-service call. No compute instance carries a public IP.
+■
+## Encrypted, key-managed
+AES-256-GCM at rest, TLS 1.3 in transit, ledger data protected with HSM-backed keys.
+▲
+## Multi-region by default
+Active-passive deployment across primary and disaster-recovery regions, tested with quarterly failover exercises.
+≡
+## Full audit trail
+Every payout's lifecycle is preserved as an immutable event, so any transaction can be reconstructed end-to-end.
+Who it's for
+## Built for platforms that pay a lot of people.
+If your business sends payouts to a distributed base of recipients rather than accepting payments from them, PrimePay is built around your problem.
+01
+## Marketplaces & platforms
+02
+## Gig & creator economy
+03
+## Affiliate & ad-tech networks
+04
+## Insurance carriers
+05
+## Brokerages & fintechs
+06
+## Corporate contractor payments
+## Send your first payout today.
+Spin up a sandbox in minutes, or talk to our team about your corridors, volume, and rollout.
+Start in the sandbox
+Talk to sales
+PrimePay
+Rails
+Platform
+Security
+Docs
+Support
+PrimePay is a payout gateway platform. Outbound disbursements only — no card acceptance, no checkout.
+
+---
+
+## Prime Fast Pay — Developer API Reference
+
+Developer API — Prime Fast Pay
+Prime Fast Pay
+Home
+API reference
+Get API access
+Get started
+Quick start
+Authentication
+Payment methods
+Payouts
+POSTCreate a payout
+GETRetrieve a payout
+GETList payouts
+POSTCancel a payout
+Recipients
+POSTCreate a recipient
+GETRetrieve a recipient
+GETList recipients
+Events
+Receiving webhooks
+Event types
+AI Agents
+Overview
+Claude Agent SDK
+LangChain
+Google ADK
+CrewAI
+Reference
+Error codes
+Developer API
+## Send payouts, on the rail that gets there first.
+Send payouts globally via ACH, real-time payments, virtual cards, push-to-card, digital checks, and international wire. RESTful, JSON-based, and built for developers.
+## Quick start
+Send your first payout in three steps.
+1Get your API keys from the dashboard.
+2Create a recipient with bank or card details.
+3Send a payout — funds arrive in seconds.
+Base URL
+```
+https://api.primefastpay.com/v1
+```
+## Base URLs by environment
+EnvironmentBase URL
+Sandboxhttps://api.sandbox.primefastpay.com/v1
+Productionhttps://api.primefastpay.com/v1
+All requests must use HTTPS. Unencrypted HTTP requests are rejected.
+## Authentication
+Authenticate every request with your secret API key in the Authorization header. Keys are environment-scoped: use test keys for sandbox, live keys for production.
+```
+Authorization: Bearer sk_live_xxxxxxxx
+```
+## API key types
+PrefixEnvironmentRate limit
+sk_test_Sandbox100 req/min
+sk_live_Production1,000 req/min
+Keep secret keys server-side. Never expose secret keys in client-side code. Use publishable keys (pk_) only for tokenizing recipient data.
+## Payment methods
+Choose the method per payout — Prime Fast Pay doesn't lock you into one rail.
+MethodSpeedFeeCountries
+ach1–2 business days$0.25US
+rtpSeconds (24/7)$0.50US
+push_to_cardMinutes1.5%US, CA, UK
+virtual_cardInstant$1.00US, CA
+digital_check1–3 business days$0.50US
+wireSame day$15.00160+ countries
+All fees are deducted from the payout amount unless you opt for sender-bears-cost in your dashboard settings.
+## Create a payout
+Initiate a payout to a recipient. Funds are disbursed according to the selected method.
+POST/v1/payouts
+## Headers
+HeaderRequiredDescription
+AuthorizationYesBearer sk_xxx
+Content-TypeYesapplication/json
+Idempotency-KeyNoUUID. Prevents duplicate payouts for 24h.
+## Body parameters
+ParameterTypeDescription
+amount requiredintegerAmount in smallest currency unit (cents). Min 100 ($1.00).
+currency requiredstringISO 4217 code: USD, EUR, GBP, CAD.
+recipient_id requiredstringID of the recipient. Create one first via POST /recipients.
+method requiredstringach, rtp, push_to_card, virtual_card, digital_check, wire.
+descriptionstringInternal memo. Max 255 chars.
+metadataobjectKey-value pairs for internal tracking. Max 20 keys.
+Example request
+```
+curl -X POST https://api.primefastpay.com/v1/payouts \
+-H "Authorization: Bearer sk_live_xxxxxxxx" \
+-H "Content-Type: application/json" \
+-H "Idempotency-Key: $(uuidgen)" \
+-d '{
+"amount": 250000,
+"currency": "USD",
+"recipient_id": "rec_9x8y7z6w5v4u",
+"method": "rtp",
+"description": "Invoice #4421",
+"metadata": {
+"invoice_id": "4421",
+"project": "website-redesign"
+}
+}'
+```
+Example response
+```
+{
+"id": "pay_1a2b3c4d5e6f",
+"object": "payout",
+"amount": 250000,
+"currency": "USD",
+"status": "completed",
+"method": "rtp",
+"recipient_id": "rec_9x8y7z6w5v4u",
+"description": "Invoice #4421",
+"metadata": {
+"invoice_id": "4421",
+"project": "website-redesign"
+},
+"estimated_arrival": "2026-08-11T12:22:15Z",
+"created_at": "2026-08-11T12:22:10Z",
+"completed_at": "2026-08-11T12:22:15Z"
+}
+```
+## Retrieve a payout
+Fetch a single payout by its ID.
+GET/v1/payouts/{payout_id}
+## Path parameters
+ParameterTypeDescription
+payout_id requiredstringUnique payout identifier, e.g. pay_1a2b3c4d5e6f.
+```
+curl https://api.primefastpay.com/v1/payouts/pay_1a2b3c4d5e6f \
+-H "Authorization: Bearer sk_live_xxxxxxxx"
+```
+## List payouts
+Returns a paginated list of payouts. Filter by status, method, date range, or recipient.
+GET/v1/payouts
+## Query parameters
+ParameterTypeDescription
+statusstringpending, processing, completed, failed, canceled.
+methodstringFilter by payout method.
+recipient_idstringFilter to a single recipient.
+created_aftertimestampISO 8601. Inclusive.
+created_beforetimestampISO 8601. Inclusive.
+limitintegerMax 100. Default 10.
+starting_afterstringCursor for pagination.
+```
+curl "https://api.primefastpay.com/v1/payouts?status=completed&limit=20" \
+-H "Authorization: Bearer sk_live_xxxxxxxx"
+```
+## Cancel a payout
+Cancel a payout that has not yet been submitted to the banking network. Once processing or completed, cancellation is impossible.
+POST/v1/payouts/{payout_id}/cancel
+```
+curl -X POST https://api.primefastpay.com/v1/payouts/pay_1a2b3c4d5e6f/cancel \
+-H "Authorization: Bearer sk_live_xxxxxxxx"
+```
+Error response, already submitted
+```
+{
+"error": {
+"type": "payout_not_cancellable",
+"message": "This payout has already been submitted to the network and cannot be canceled."
+}
+}
+```
+## Create a recipient
+Store a recipient's payout details securely. Prime Fast Pay tokenizes sensitive data — you never handle raw account numbers after creation.
+POST/v1/recipients
+## Body parameters
+ParameterTypeDescription
+type requiredstringindividual or business.
+name requiredstringFull legal name of the recipient.
+email requiredstringValid email for notifications.
+bank_accountobjectRequired for ach, rtp, wire. Contains routing_number and account_number.
+debit_cardobjectRequired for push_to_card. Contains number, exp_month, exp_year.
+addressobjectStreet, city, state, postal_code, country.
+tax_idstringSSN or EIN for tax reporting (1099/1042-S).
+Example request
+```
+curl -X POST https://api.primefastpay.com/v1/recipients \
+-H "Authorization: Bearer sk_live_xxxxxxxx" \
+-H "Content-Type: application/json" \
+-d '{
+"type": "individual",
+"name": "John Doe",
+"email": "john@example.com",
+"bank_account": {
+"routing_number": "021000021",
+"account_number": "000123456789",
+"account_type": "checking"
+},
+"address": {
+"line1": "123 Main St",
+"city": "New York",
+"state": "NY",
+"postal_code": "10001",
+"country": "US"
+}
+}'
+```
+Example response
+```
+{
+"id": "rec_9x8y7z6w5v4u",
+"object": "recipient",
+"type": "individual",
+"name": "John Doe",
+"email": "john@example.com",
+"status": "verified",
+"created_at": "2026-08-11T12:22:10Z"
+}
+```
+## Retrieve a recipient
+GET/v1/recipients/{recipient_id}
+```
+curl https://api.primefastpay.com/v1/recipients/rec_9x8y7z6w5v4u \
+-H "Authorization: Bearer sk_live_xxxxxxxx"
+```
+## List recipients
+GET/v1/recipients
+## Query parameters
+ParameterTypeDescription
+statusstringpending, verified, restricted.
+typestringindividual or business.
+emailstringExact match filter.
+limitintegerMax 100. Default 10.
+starting_afterstringCursor pagination.
+## Receiving webhooks
+Subscribe to real-time events by registering an HTTPS endpoint. Prime Fast Pay signs every payload with a secret so you can verify authenticity.
+## Webhook signature
+Each request includes a PrimeFastPay-Signature header:
+```
+PrimeFastPay-Signature: t=1723381330,v1=sha256=abc123def456...
+```
+Verify by computing the HMAC-SHA256 of timestamp.payload with your webhook secret and comparing to v1.
+```
+const crypto = require('crypto');
+function verifyWebhook(payload, signature, secret) {
+const [t, v1] = signature.split(',').map(s => s.split('=')[1]);
+const signed = crypto.createHmac('sha256', secret)
+.update(`${t}.${payload}`)
+.digest('hex');
+return crypto.timingSafeEqual(
+Buffer.from(signed), Buffer.from(v1)
+);
+}
+```
+Respond with 200 OK within 5 seconds. Failed deliveries are retried with exponential backoff for 3 days.
+## Event types
+All events follow the pattern resource.action.
+payout.created
+payout.processing
+payout.completed
+payout.failed
+payout.canceled
+recipient.created
+recipient.verified
+recipient.restricted
+transfer.created
+transfer.completed
+## AI agent integrations
+The Prime Fast Pay MCP server exposes every endpoint in this reference as a tool. Any agent framework that speaks MCP can drive the API — no glue code, no per-SDK adapters. Install the wrapper once, point your agent at it, and let the model call the API.
+## Install the MCP wrapper
+From source
+```
+cargo install prime-fast-pay-mcp
+```
+The wrapper reads your API key from the environment and streams tool calls over stdio. Set it once before launching your agent:
+```
+export PRIME_FAST_PAY_API_KEY=sk_live_xxxxxxxx
+```
+Tools exposed. The wrapper registers one MCP tool per endpoint: create_payout, retrieve_payout, list_payouts, cancel_payout, create_recipient, retrieve_recipient, list_recipients. Tool schemas mirror the OpenAPI spec, so the model sees typed parameters and descriptions for every field.
+## Claude Agent SDK
+The Anthropic Claude Agent SDK runs Claude as an autonomous agent with access to MCP servers, file tools, and sub-agents. Use it when you want a managed agent loop without orchestrating prompts yourself.
+Install
+```
+pip install claude-agent-sdk
+```
+agent.py
+```
+import asyncio
+from claude_agent_sdk import query, ClaudeAgentOptions
+async def main():
+options = ClaudeAgentOptions(
+mcp_servers={
+"prime-fast-pay": {
+"command": "prime-fast-pay-mcp",
+"env": {"PRIME_FAST_PAY_API_KEY": "sk_live_xxxxxxxx"}
+}
+},
+allowed_tools=["mcp__prime-fast-pay__*"],
+system_prompt="You send payouts. Always confirm the recipient, amount, and method before calling create_payout."
+)
+async for message in query(
+prompt="Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP for invoice #4421.",
+options=options
+):
+if message["type"] == "result":
+print(message["result"])
+asyncio.run(main())
+```
+## LangChain
+LangChain loads MCP tools through langchain-mcp-adapters and runs them through a LangGraph React agent. Use this when you're already building on LangChain or LangGraph and want a single tool list across MCP and LangChain-native tools.
+Install
+```
+pip install langchain langchain-anthropic langchain-mcp-adapters langgraph
+```
+agent.py
+```
+import asyncio
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langchain_anthropic import ChatAnthropic
+from langgraph.prebuilt import create_react_agent
+async def main():
+client = MultiServerMCPClient({
+"prime-fast-pay": {
+"command": "prime-fast-pay-mcp",
+"transport": "stdio",
+"env": {"PRIME_FAST_PAY_API_KEY": "sk_live_xxxxxxxx"}
+}
+})
+tools = await client.get_tools()
+model = ChatAnthropic(model="claude-opus-4-8")
+agent = create_react_agent(model, tools)
+result = await agent.ainvoke({
+"messages": [("user", "Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP for invoice #4421.")]
+})
+print(result["messages"][-1].content)
+asyncio.run(main())
+```
+## Google ADK
+Google's Agent Development Kit ships an McpToolset that loads MCP tools into a Gemini-powered agent. Use it when you're building on Vertex AI or want Gemini as the reasoning engine.
+Install
+```
+pip install google-adk
+```
+agent.py
+```
+import asyncio
+from google.adk.agents import LlmAgent
+from google.adk.tools.mcp_tool import McpToolset, StdioServerParameters
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
+async def main():
+tools = McpToolset(
+connection_params=StdioServerParameters(
+command="prime-fast-pay-mcp",
+env={"PRIME_FAST_PAY_API_KEY": "sk_live_xxxxxxxx"}
+)
+)
+agent = LlmAgent(
+model="gemini-2.5-flash",
+name="payout_agent",
+instruction="You send payouts. Always confirm the recipient, amount, and method before calling create_payout.",
+tools=[tools],
+)
+session_service = InMemorySessionService()
+runner = Runner(agent=agent, app_name="prime-fast-pay", session_service=session_service)
+session = await session_service.create_session(
+app_name="prime-fast-pay", user_id="user_123", session_id="session_456"
+)
+content = types.Content(
+role="user",
+parts=[types.Part(text="Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP for invoice #4421.")]
+)
+async for event in runner.run_async(
+user_id="user_123", session_id="session_456", new_message=content
+):
+if event.is_final_response():
+print(event.content.parts[0].text)
+asyncio.run(main())
+```
+## CrewAI
+CrewAI orchestrates role-based agents that collaborate on tasks. Use MCPServerAdapter from crewai-tools to wire Prime Fast Pay tools into any agent or crew — no custom tool classes required.
+Install
+```
+pip install crewai crewai-tools
+```
+agent.py
+```
+from crewai import Agent, Task, Crew, Process, LLM
+from crewai_tools import MCPServerAdapter
+mcp_tools = MCPServerAdapter({
+"prime-fast-pay": {
+"command": "prime-fast-pay-mcp",
+"env": {"PRIME_FAST_PAY_API_KEY": "sk_live_xxxxxxxx"}
+}
+})
+agent = Agent(
+role="Payout Specialist",
+goal="Send payouts accurately and confirm delivery.",
+backstory="You are an expert at managing outbound payments via Prime Fast Pay.",
+tools=mcp_tools,
+llm=LLM(model="anthropic/claude-opus-4-8"),
+verbose=True,
+)
+task = Task(
+description="Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP for invoice #4421. Return the payout ID.",
+expected_output="A short confirmation containing the payout ID returned by create_payout.",
+agent=agent,
+)
+crew = Crew(agents=[agent], tasks=[task], process=Process.sequential)
+print(crew.kickoff())
+```
+Pick a sandbox key while iterating. All four examples use sk_live_ for brevity, but sk_test_ keys route through the sandbox and never move real money — switch before you let an agent run unattended.
+## Error codes
+Errors return an error object with type, message, and optionally code and param.
+HTTPTypeMeaning
+400bad_requestInvalid parameters. Check param for the offending field.
+401unauthorizedInvalid or missing API key.
+402insufficient_fundsAccount balance too low for this payout.
+404resource_not_foundPayout or recipient ID does not exist.
+409idempotency_conflictIdempotency key reused with different parameters.
+422recipient_unverifiedRecipient failed KYC or bank verification.
+429rate_limit_exceededToo many requests. Retry after the Retry-After header value.
+500api_errorTemporary server error. Retry with exponential backoff.
+Example error
+```
+{
+"error": {
+"type": "bad_request",
+"message": "Invalid routing number.",
+"code": "invalid_routing_number",
+"param": "bank_account.routing_number"
+}
+}
+```
+
+---
+

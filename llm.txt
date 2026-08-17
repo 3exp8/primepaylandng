@@ -1,0 +1,91 @@
+# Prime Fast Pay
+
+> Payout infrastructure for AI agents. Tell your agent to send the money — Prime Fast Pay picks the rail, runs the checks, and settles in seconds.
+
+Prime Fast Pay is a single API for outbound disbursements. It routes payouts across ACH, RTP, FedNow, SEPA, SWIFT, and card networks, and exposes every endpoint to AI agents through a native MCP server.
+
+## What it does
+
+- Issues a payout from a typed REST request: `POST /v1/payouts`
+- Screens the recipient (sanctions, PEP, velocity) before funds are reserved
+- Posts to a double-entry ledger, then routes on the cheapest instant rail for that corridor
+- Confirms settlement in under 30 seconds on real-time rails (RTP, FedNow, SEPA Instant)
+- Replicates the entire API as typed tools through MCP for agent frameworks
+- Falls back automatically if a rail degrades mid-flight
+- Reconciles settlement against every rail's own reports
+
+## Performance
+
+- API response time: under 250ms at p95, at 5,000 req/s sustained
+- Payout confirmation on real-time rails: under 30s at p95
+- 9 payment rails behind a single API
+- 160+ countries reachable via international wire
+
+## Supported rails
+
+| Rail | Speed | Coverage |
+|---|---|---|
+| ACH (Standard & Same-Day) | 1–2 business days | United States |
+| RTP | Seconds, 24/7 | United States |
+| FedNow | Seconds, 24/7 | United States |
+| Push-to-Card | Minutes | US, CA, UK |
+| Virtual Card Issuance | Instant | US, CA |
+| Digital Check | 1–3 business days | United States |
+| International Wire (SWIFT) | Same day | 160+ countries |
+| SEPA SCT | Next business day | SEPA zone |
+| SEPA Instant | Seconds, 24/7 | SEPA zone |
+
+## AI agent integrations
+
+The MCP server is compatible with:
+
+- **Claude Agent SDK** — managed agent loop with MCP access built in
+- **LangChain / LangGraph** — through `langchain-mcp-adapters`
+- **Google ADK** — `McpToolset` drops the tools straight into a Gemini-powered agent on Vertex AI
+- **CrewAI** — `MCPServerAdapter` wires payouts into any role-based crew
+
+Install: `cargo install prime-fast-pay-mcp`
+Configure: `export PRIME_FAST_PAY_API_KEY=sk_live_xxxxxxxx`
+
+MCP tools exposed: `create_payout`, `retrieve_payout`, `list_payouts`, `cancel_payout`, `create_recipient`, `retrieve_recipient`, `list_recipients`.
+
+## Key endpoints
+
+- `POST /v1/payouts` — create a payout
+- `GET /v1/payouts/{id}` — retrieve a payout
+- `POST /v1/payouts/{id}/cancel` — cancel a payout
+- `POST /v1/recipients` — create a recipient
+- `GET /v1/recipients/{id}` — retrieve a recipient
+- Webhooks: `payout.created`, `payout.processing`, `payout.completed`, `payout.failed`
+
+## Security
+
+- Segregated merchant funds, reconciled daily
+- Sanctions, PEP, and fraud screening run on every instruction before funds are reserved
+- Mutual TLS on every service-to-service call; no public IPs on compute
+- AES-256-GCM at rest, TLS 1.3 in transit, HSM-backed ledger keys
+- Active-passive multi-region deployment with quarterly failover exercises
+- Scoped API keys (test keys route to sandbox, never move real money)
+- Idempotent by contract — every write takes an idempotency key
+
+## Architecture
+
+Three layers, one payout lifecycle:
+
+1. **Orchestration** — receives each instruction, validates it, reserves funds against the ledger, selects the best rail, tracks through confirmation
+2. **Interface** — REST API, SDKs, native MCP server, dashboard, webhooks
+3. **Compliance** — recipient verification, sanctions screening, velocity limits, automatic reconciliation
+
+## Links
+
+- Landing: https://prime-pay-landing.pages.dev/
+- Docs: https://prime-pay-landing.pages.dev/docs.html
+- Secondary landing: https://prime-pay-landing.pages.dev/primepay-landing.html
+- Sandbox: `https://api.sandbox.primefastpay.com/v1`
+- Production: `https://api.primefastpay.com/v1`
+- Contact: hello@primefastpay.com
+- Support: support@primefastpay.com
+
+## Full content
+
+A complete, plain-text dump of the marketing and documentation pages is available at `/llms-full.txt` for assistants that want the entire corpus in one fetch.
