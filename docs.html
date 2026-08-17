@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Developer API — Prime Fast Pay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0D12;
+    --surface:#12171F;
+    --surface-2:#171D27;
+    --line:#232B37;
+    --text:#E8ECF1;
+    --muted:#8A93A3;
+    --gold:#F0B94D;
+    --gold-dim:#8A6A2C;
+    --teal:#2EE6C4;
+    --teal-dim:#1B6E62;
+    --red:#EF6B6B;
+    --radius:12px;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--gold);color:var(--ink);}
+  :focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:4px;}
+  code{font-family:var(--mono);}
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    position:sticky;
+    top:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 28px;
+    background:rgba(10,13,18,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--display);
+    font-weight:600;
+    font-size:16px;
+  }
+  .logo-mark{width:20px;height:20px;flex-shrink:0;}
+  .logo-mark svg{width:100%;height:100%;}
+  .topbar-right{display:flex;align-items:center;gap:18px;font-size:13.5px;color:var(--muted);}
+  .topbar-right a:hover{color:var(--text);}
+  .btn{
+    font-family:var(--body);
+    font-size:13.5px;
+    font-weight:600;
+    padding:9px 18px;
+    border-radius:999px;
+    border:1px solid var(--gold);
+    background:var(--gold);
+    color:var(--ink);
+    transition:background .18s ease;
+  }
+  .btn:hover{background:#f5c66a;}
+
+  /* ---------- LAYOUT ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns:240px 1fr;
+    max-width:1180px;
+    margin:0 auto;
+  }
+  @media (max-width:900px){
+    .shell{grid-template-columns:1fr;}
+    .sidebar{display:none;}
+  }
+
+  .sidebar{
+    position:sticky;
+    top:57px;
+    align-self:start;
+    height:calc(100vh - 57px);
+    overflow-y:auto;
+    padding:36px 20px 40px 28px;
+    border-right:1px solid var(--line);
+  }
+  .side-group{margin-bottom:28px;}
+  .side-title{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .side-link{
+    display:block;
+    font-size:13.5px;
+    color:var(--muted);
+    padding:6px 0;
+    border-left:2px solid transparent;
+    padding-left:12px;
+    margin-left:-12px;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .side-link:hover{color:var(--text);}
+  .side-link.method{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .m-tag{
+    font-family:var(--mono);
+    font-size:10px;
+    font-weight:600;
+    padding:1px 6px;
+    border-radius:4px;
+    letter-spacing:0.02em;
+  }
+  .m-get{background:rgba(46,230,196,0.12);color:var(--teal);}
+  .m-post{background:rgba(240,185,77,0.14);color:var(--gold);}
+
+  main{
+    padding:44px 40px 120px;
+    min-width:0;
+  }
+  @media (max-width:640px){
+    main{padding:32px 20px 100px;}
+  }
+
+  .doc-header{
+    margin-bottom:56px;
+  }
+  .doc-eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(32px,4vw,44px);
+    letter-spacing:-0.01em;
+    margin-bottom:16px;
+  }
+  .doc-header p{
+    color:var(--muted);
+    font-size:16px;
+    max-width:600px;
+  }
+
+  section.doc-section{
+    padding-top:52px;
+    margin-top:8px;
+    border-top:1px solid var(--line);
+    scroll-margin-top:76px;
+  }
+  section.doc-section:first-of-type{border-top:none;padding-top:0;}
+  h3[id]{scroll-margin-top:96px;}
+
+  h2{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:23px;
+    margin-bottom:14px;
+    letter-spacing:-0.005em;
+  }
+  h3{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:17px;
+    margin:30px 0 12px;
+  }
+  .doc-section > p{
+    color:var(--muted);
+    font-size:15px;
+    max-width:640px;
+    margin-bottom:16px;
+  }
+
+  .endpoint-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--mono);
+    font-size:13px;
+    padding:8px 14px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:8px;
+    margin:14px 0 20px;
+  }
+  .endpoint-tag .m-tag{padding:2px 8px;font-size:11px;}
+
+  /* ---------- TABLES ---------- */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:8px 0 24px;
+    font-size:13.5px;
+  }
+  th{
+    text-align:left;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    padding:10px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  td{
+    padding:12px 14px;
+    border-bottom:1px solid var(--line);
+    color:var(--text);
+    vertical-align:top;
+  }
+  td code{
+    font-size:12.5px;
+    background:var(--surface-2);
+    padding:2px 6px;
+    border-radius:4px;
+    color:var(--gold);
+  }
+  td.muted, td .muted{color:var(--muted);}
+  tr:last-child td{border-bottom:none;}
+  .req{
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--teal);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+
+  /* ---------- CODE BLOCKS ---------- */
+  pre{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    overflow-x:auto;
+    margin:8px 0 24px;
+    font-family:var(--mono);
+    font-size:13px;
+    line-height:1.65;
+  }
+  pre .tok-key{color:var(--teal);}
+  pre .tok-str{color:var(--gold);}
+  pre .tok-com{color:var(--muted);}
+  pre .tok-fn{color:#8FB8FF;}
+  .code-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:20px 0 8px;
+  }
+
+  .callout{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:2px solid var(--gold);
+    border-radius:8px;
+    padding:14px 18px;
+    font-size:13.5px;
+    color:var(--muted);
+    margin:20px 0 24px;
+  }
+  .callout strong{color:var(--text);}
+
+  .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 22px;}
+  .pill{
+    font-family:var(--mono);
+    font-size:12px;
+    padding:5px 12px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    color:var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="prime-fast-pay.html" class="logo">
+    <span class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" stroke="#F0B94D" stroke-width="1.4"/>
+        <path d="M12 2V22M3 7L21 17M21 7L3 17" stroke="#2EE6C4" stroke-width="1" opacity="0.6"/>
+      </svg>
+    </span>
+    Prime Fast Pay
+  </a>
+  <div class="topbar-right">
+    <a href="prime-fast-pay.html">Home</a>
+    <a href="#authentication">API reference</a>
+    <a href="#start" class="btn">Get API access</a>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="sidebar">
+    <div class="side-group">
+      <div class="side-title">Get started</div>
+      <a class="side-link" href="#quick-start">Quick start</a>
+      <a class="side-link" href="#authentication">Authentication</a>
+      <a class="side-link" href="#payment-methods">Payment methods</a>
+    </div>
+    <div class="side-group">
+      <div class="side-title">Payouts</div>
+      <a class="side-link method" href="#create-payout"><span class="m-tag m-post">POST</span>Create a payout</a>
+      <a class="side-link method" href="#retrieve-payout"><span class="m-tag m-get">GET</span>Retrieve a payout</a>
+      <a class="side-link method" href="#list-payouts"><span class="m-tag m-get">GET</span>List payouts</a>
+      <a class="side-link method" href="#cancel-payout"><span class="m-tag m-post">POST</span>Cancel a payout</a>
+    </div>
+    <div class="side-group">
+      <div class="side-title">Recipients</div>
+      <a class="side-link method" href="#create-recipient"><span class="m-tag m-post">POST</span>Create a recipient</a>
+      <a class="side-link method" href="#retrieve-recipient"><span class="m-tag m-get">GET</span>Retrieve a recipient</a>
+      <a class="side-link method" href="#list-recipients"><span class="m-tag m-get">GET</span>List recipients</a>
+    </div>
+    <div class="side-group">
+      <div class="side-title">Events</div>
+      <a class="side-link" href="#webhooks">Receiving webhooks</a>
+      <a class="side-link" href="#event-types">Event types</a>
+    </div>
+    <div class="side-group">
+      <div class="side-title">AI Agents</div>
+      <a class="side-link" href="#ai-agents">Overview</a>
+      <a class="side-link" href="#claude-agent-sdk">Claude Agent SDK</a>
+      <a class="side-link" href="#langchain">LangChain</a>
+      <a class="side-link" href="#google-adk">Google ADK</a>
+      <a class="side-link" href="#crewai">CrewAI</a>
+    </div>
+    <div class="side-group">
+      <div class="side-title">Reference</div>
+      <a class="side-link" href="#errors">Error codes</a>
+    </div>
+  </nav>
+
+  <main>
+    <div class="doc-header">
+      <div class="doc-eyebrow">Developer API</div>
+      <h1>Send payouts, on the rail that gets there first.</h1>
+      <p>Send payouts globally via ACH, real-time payments, virtual cards, push-to-card, digital checks, and international wire. RESTful, JSON-based, and built for developers.</p>
+    </div>
+
+    <section class="doc-section" id="quick-start">
+      <h2>Quick start</h2>
+      <p>Send your first payout in three steps.</p>
+      <table>
+        <tr><td style="width:32px;color:var(--gold);font-family:var(--mono)">1</td><td>Get your API keys from the dashboard.</td></tr>
+        <tr><td style="color:var(--gold);font-family:var(--mono)">2</td><td>Create a recipient with bank or card details.</td></tr>
+        <tr><td style="color:var(--gold);font-family:var(--mono)">3</td><td>Send a payout — funds arrive in seconds.</td></tr>
+      </table>
+
+      <div class="code-label">Base URL</div>
+      <pre>https://api.primefastpay.com/v1</pre>
+
+      <h3>Base URLs by environment</h3>
+      <table>
+        <tr><th>Environment</th><th>Base URL</th></tr>
+        <tr><td>Sandbox</td><td><code>https://api.sandbox.primefastpay.com/v1</code></td></tr>
+        <tr><td>Production</td><td><code>https://api.primefastpay.com/v1</code></td></tr>
+      </table>
+      <div class="callout">All requests must use HTTPS. Unencrypted HTTP requests are rejected.</div>
+    </section>
+
+    <section class="doc-section" id="authentication">
+      <h2>Authentication</h2>
+      <p>Authenticate every request with your secret API key in the <code>Authorization</code> header. Keys are environment-scoped: use test keys for sandbox, live keys for production.</p>
+
+      <pre>Authorization: Bearer sk_live_xxxxxxxx</pre>
+
+      <h3>API key types</h3>
+      <table>
+        <tr><th>Prefix</th><th>Environment</th><th>Rate limit</th></tr>
+        <tr><td><code>sk_test_</code></td><td>Sandbox</td><td>100 req/min</td></tr>
+        <tr><td><code>sk_live_</code></td><td>Production</td><td>1,000 req/min</td></tr>
+      </table>
+      <div class="callout"><strong>Keep secret keys server-side.</strong> Never expose secret keys in client-side code. Use publishable keys (<code>pk_</code>) only for tokenizing recipient data.</div>
+    </section>
+
+    <section class="doc-section" id="payment-methods">
+      <h2>Payment methods</h2>
+      <p>Choose the method per payout — Prime Fast Pay doesn't lock you into one rail.</p>
+      <table>
+        <tr><th>Method</th><th>Speed</th><th>Fee</th><th>Countries</th></tr>
+        <tr><td><code>ach</code></td><td>1–2 business days</td><td>$0.25</td><td>US</td></tr>
+        <tr><td><code>rtp</code></td><td>Seconds (24/7)</td><td>$0.50</td><td>US</td></tr>
+        <tr><td><code>push_to_card</code></td><td>Minutes</td><td>1.5%</td><td>US, CA, UK</td></tr>
+        <tr><td><code>virtual_card</code></td><td>Instant</td><td>$1.00</td><td>US, CA</td></tr>
+        <tr><td><code>digital_check</code></td><td>1–3 business days</td><td>$0.50</td><td>US</td></tr>
+        <tr><td><code>wire</code></td><td>Same day</td><td>$15.00</td><td>160+ countries</td></tr>
+      </table>
+      <p style="font-size:13.5px;">All fees are deducted from the payout amount unless you opt for sender-bears-cost in your dashboard settings.</p>
+    </section>
+
+    <section class="doc-section" id="create-payout">
+      <h2>Create a payout</h2>
+      <p>Initiate a payout to a recipient. Funds are disbursed according to the selected method.</p>
+      <div class="endpoint-tag"><span class="m-tag m-post">POST</span>/v1/payouts</div>
+
+      <h3>Headers</h3>
+      <table>
+        <tr><th>Header</th><th>Required</th><th>Description</th></tr>
+        <tr><td><code>Authorization</code></td><td class="req">Yes</td><td>Bearer sk_xxx</td></tr>
+        <tr><td><code>Content-Type</code></td><td class="req">Yes</td><td>application/json</td></tr>
+        <tr><td><code>Idempotency-Key</code></td><td class="muted">No</td><td>UUID. Prevents duplicate payouts for 24h.</td></tr>
+      </table>
+
+      <h3>Body parameters</h3>
+      <table>
+        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+        <tr><td><code>amount</code> <span class="req">required</span></td><td>integer</td><td>Amount in smallest currency unit (cents). Min 100 ($1.00).</td></tr>
+        <tr><td><code>currency</code> <span class="req">required</span></td><td>string</td><td>ISO 4217 code: USD, EUR, GBP, CAD.</td></tr>
+        <tr><td><code>recipient_id</code> <span class="req">required</span></td><td>string</td><td>ID of the recipient. Create one first via <code>POST /recipients</code>.</td></tr>
+        <tr><td><code>method</code> <span class="req">required</span></td><td>string</td><td><code>ach</code>, <code>rtp</code>, <code>push_to_card</code>, <code>virtual_card</code>, <code>digital_check</code>, <code>wire</code>.</td></tr>
+        <tr><td><code>description</code></td><td>string</td><td>Internal memo. Max 255 chars.</td></tr>
+        <tr><td><code>metadata</code></td><td>object</td><td>Key-value pairs for internal tracking. Max 20 keys.</td></tr>
+      </table>
+
+      <div class="code-label">Example request</div>
+      <pre>curl -X POST https://api.primefastpay.com/v1/payouts \
+  -H "Authorization: Bearer sk_live_xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "amount": 250000,
+    "currency": "USD",
+    "recipient_id": "rec_9x8y7z6w5v4u",
+    "method": "rtp",
+    "description": "Invoice #4421",
+    "metadata": {
+      "invoice_id": "4421",
+      "project": "website-redesign"
+    }
+  }'</pre>
+
+      <div class="code-label">Example response</div>
+      <pre>{
+  "id": "pay_1a2b3c4d5e6f",
+  "object": "payout",
+  "amount": 250000,
+  "currency": "USD",
+  "status": "completed",
+  "method": "rtp",
+  "recipient_id": "rec_9x8y7z6w5v4u",
+  "description": "Invoice #4421",
+  "metadata": {
+    "invoice_id": "4421",
+    "project": "website-redesign"
+  },
+  "estimated_arrival": "2026-08-11T12:22:15Z",
+  "created_at": "2026-08-11T12:22:10Z",
+  "completed_at": "2026-08-11T12:22:15Z"
+}</pre>
+    </section>
+
+    <section class="doc-section" id="retrieve-payout">
+      <h2>Retrieve a payout</h2>
+      <p>Fetch a single payout by its ID.</p>
+      <div class="endpoint-tag"><span class="m-tag m-get">GET</span>/v1/payouts/{payout_id}</div>
+
+      <h3>Path parameters</h3>
+      <table>
+        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+        <tr><td><code>payout_id</code> <span class="req">required</span></td><td>string</td><td>Unique payout identifier, e.g. <code>pay_1a2b3c4d5e6f</code>.</td></tr>
+      </table>
+
+      <pre>curl https://api.primefastpay.com/v1/payouts/pay_1a2b3c4d5e6f \
+  -H "Authorization: Bearer sk_live_xxxxxxxx"</pre>
+    </section>
+
+    <section class="doc-section" id="list-payouts">
+      <h2>List payouts</h2>
+      <p>Returns a paginated list of payouts. Filter by status, method, date range, or recipient.</p>
+      <div class="endpoint-tag"><span class="m-tag m-get">GET</span>/v1/payouts</div>
+
+      <h3>Query parameters</h3>
+      <table>
+        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+        <tr><td><code>status</code></td><td>string</td><td><code>pending</code>, <code>processing</code>, <code>completed</code>, <code>failed</code>, <code>canceled</code>.</td></tr>
+        <tr><td><code>method</code></td><td>string</td><td>Filter by payout method.</td></tr>
+        <tr><td><code>recipient_id</code></td><td>string</td><td>Filter to a single recipient.</td></tr>
+        <tr><td><code>created_after</code></td><td>timestamp</td><td>ISO 8601. Inclusive.</td></tr>
+        <tr><td><code>created_before</code></td><td>timestamp</td><td>ISO 8601. Inclusive.</td></tr>
+        <tr><td><code>limit</code></td><td>integer</td><td>Max 100. Default 10.</td></tr>
+        <tr><td><code>starting_after</code></td><td>string</td><td>Cursor for pagination.</td></tr>
+      </table>
+
+      <pre>curl "https://api.primefastpay.com/v1/payouts?status=completed&limit=20" \
+  -H "Authorization: Bearer sk_live_xxxxxxxx"</pre>
+    </section>
+
+    <section class="doc-section" id="cancel-payout">
+      <h2>Cancel a payout</h2>
+      <p>Cancel a payout that has not yet been submitted to the banking network. Once processing or completed, cancellation is impossible.</p>
+      <div class="endpoint-tag"><span class="m-tag m-post">POST</span>/v1/payouts/{payout_id}/cancel</div>
+
+      <pre>curl -X POST https://api.primefastpay.com/v1/payouts/pay_1a2b3c4d5e6f/cancel \
+  -H "Authorization: Bearer sk_live_xxxxxxxx"</pre>
+
+      <div class="code-label">Error response, already submitted</div>
+      <pre>{
+  "error": {
+    "type": "payout_not_cancellable",
+    "message": "This payout has already been submitted to the network and cannot be canceled."
+  }
+}</pre>
+    </section>
+
+    <section class="doc-section" id="create-recipient">
+      <h2>Create a recipient</h2>
+      <p>Store a recipient's payout details securely. Prime Fast Pay tokenizes sensitive data — you never handle raw account numbers after creation.</p>
+      <div class="endpoint-tag"><span class="m-tag m-post">POST</span>/v1/recipients</div>
+
+      <h3>Body parameters</h3>
+      <table>
+        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+        <tr><td><code>type</code> <span class="req">required</span></td><td>string</td><td><code>individual</code> or <code>business</code>.</td></tr>
+        <tr><td><code>name</code> <span class="req">required</span></td><td>string</td><td>Full legal name of the recipient.</td></tr>
+        <tr><td><code>email</code> <span class="req">required</span></td><td>string</td><td>Valid email for notifications.</td></tr>
+        <tr><td><code>bank_account</code></td><td>object</td><td>Required for <code>ach</code>, <code>rtp</code>, <code>wire</code>. Contains <code>routing_number</code> and <code>account_number</code>.</td></tr>
+        <tr><td><code>debit_card</code></td><td>object</td><td>Required for <code>push_to_card</code>. Contains <code>number</code>, <code>exp_month</code>, <code>exp_year</code>.</td></tr>
+        <tr><td><code>address</code></td><td>object</td><td>Street, city, state, postal_code, country.</td></tr>
+        <tr><td><code>tax_id</code></td><td>string</td><td>SSN or EIN for tax reporting (1099/1042-S).</td></tr>
+      </table>
+
+      <div class="code-label">Example request</div>
+      <pre>curl -X POST https://api.primefastpay.com/v1/recipients \
+  -H "Authorization: Bearer sk_live_xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "individual",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "bank_account": {
+      "routing_number": "021000021",
+      "account_number": "000123456789",
+      "account_type": "checking"
+    },
+    "address": {
+      "line1": "123 Main St",
+      "city": "New York",
+      "state": "NY",
+      "postal_code": "10001",
+      "country": "US"
+    }
+  }'</pre>
+
+      <div class="code-label">Example response</div>
+      <pre>{
+  "id": "rec_9x8y7z6w5v4u",
+  "object": "recipient",
+  "type": "individual",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "status": "verified",
+  "created_at": "2026-08-11T12:22:10Z"
+}</pre>
+    </section>
+
+    <section class="doc-section" id="retrieve-recipient">
+      <h2>Retrieve a recipient</h2>
+      <div class="endpoint-tag"><span class="m-tag m-get">GET</span>/v1/recipients/{recipient_id}</div>
+      <pre>curl https://api.primefastpay.com/v1/recipients/rec_9x8y7z6w5v4u \
+  -H "Authorization: Bearer sk_live_xxxxxxxx"</pre>
+    </section>
+
+    <section class="doc-section" id="list-recipients">
+      <h2>List recipients</h2>
+      <div class="endpoint-tag"><span class="m-tag m-get">GET</span>/v1/recipients</div>
+
+      <h3>Query parameters</h3>
+      <table>
+        <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+        <tr><td><code>status</code></td><td>string</td><td><code>pending</code>, <code>verified</code>, <code>restricted</code>.</td></tr>
+        <tr><td><code>type</code></td><td>string</td><td><code>individual</code> or <code>business</code>.</td></tr>
+        <tr><td><code>email</code></td><td>string</td><td>Exact match filter.</td></tr>
+        <tr><td><code>limit</code></td><td>integer</td><td>Max 100. Default 10.</td></tr>
+        <tr><td><code>starting_after</code></td><td>string</td><td>Cursor pagination.</td></tr>
+      </table>
+    </section>
+
+    <section class="doc-section" id="webhooks">
+      <h2>Receiving webhooks</h2>
+      <p>Subscribe to real-time events by registering an HTTPS endpoint. Prime Fast Pay signs every payload with a secret so you can verify authenticity.</p>
+
+      <h3>Webhook signature</h3>
+      <p>Each request includes a <code>PrimeFastPay-Signature</code> header:</p>
+      <pre>PrimeFastPay-Signature: t=1723381330,v1=sha256=abc123def456...</pre>
+      <p>Verify by computing the HMAC-SHA256 of <code>timestamp.payload</code> with your webhook secret and comparing to <code>v1</code>.</p>
+
+      <pre><span class="tok-key">const</span> crypto = require(<span class="tok-str">'crypto'</span>);
+
+<span class="tok-key">function</span> <span class="tok-fn">verifyWebhook</span>(payload, signature, secret) {
+  <span class="tok-key">const</span> [t, v1] = signature.split(<span class="tok-str">','</span>).map(s <span class="tok-key">=></span> s.split(<span class="tok-str">'='</span>)[1]);
+  <span class="tok-key">const</span> signed = crypto.createHmac(<span class="tok-str">'sha256'</span>, secret)
+    .update(`${t}.${payload}`)
+    .digest(<span class="tok-str">'hex'</span>);
+  <span class="tok-key">return</span> crypto.timingSafeEqual(
+    Buffer.from(signed), Buffer.from(v1)
+  );
+}</pre>
+
+      <div class="callout">Respond with <strong>200 OK</strong> within 5 seconds. Failed deliveries are retried with exponential backoff for 3 days.</div>
+    </section>
+
+    <section class="doc-section" id="event-types">
+      <h2>Event types</h2>
+      <p>All events follow the pattern <code>resource.action</code>.</p>
+      <div class="pill-row">
+        <span class="pill">payout.created</span>
+        <span class="pill">payout.processing</span>
+        <span class="pill">payout.completed</span>
+        <span class="pill">payout.failed</span>
+        <span class="pill">payout.canceled</span>
+        <span class="pill">recipient.created</span>
+        <span class="pill">recipient.verified</span>
+        <span class="pill">recipient.restricted</span>
+        <span class="pill">transfer.created</span>
+        <span class="pill">transfer.completed</span>
+      </div>
+    </section>
+
+    <section class="doc-section" id="ai-agents">
+      <h2>AI agent integrations</h2>
+      <p>The Prime Fast Pay MCP server exposes every endpoint in this reference as a tool. Any agent framework that speaks MCP can drive the API — no glue code, no per-SDK adapters. Install the wrapper once, point your agent at it, and let the model call the API.</p>
+
+      <h3>Install the MCP wrapper</h3>
+      <div class="code-label">From source</div>
+      <pre>cargo install prime-fast-pay-mcp</pre>
+      <p>The wrapper reads your API key from the environment and streams tool calls over stdio. Set it once before launching your agent:</p>
+      <pre>export PRIME_FAST_PAY_API_KEY=sk_live_xxxxxxxx</pre>
+      <div class="callout"><strong>Tools exposed.</strong> The wrapper registers one MCP tool per endpoint: <code>create_payout</code>, <code>retrieve_payout</code>, <code>list_payouts</code>, <code>cancel_payout</code>, <code>create_recipient</code>, <code>retrieve_recipient</code>, <code>list_recipients</code>. Tool schemas mirror the OpenAPI spec, so the model sees typed parameters and descriptions for every field.</div>
+
+      <h3 id="claude-agent-sdk">Claude Agent SDK</h3>
+      <p>The Anthropic Claude Agent SDK runs Claude as an autonomous agent with access to MCP servers, file tools, and sub-agents. Use it when you want a managed agent loop without orchestrating prompts yourself.</p>
+
+      <div class="code-label">Install</div>
+      <pre>pip install claude-agent-sdk</pre>
+
+      <div class="code-label">agent.py</div>
+      <pre><span class="tok-key">import</span> asyncio
+<span class="tok-key">from</span> claude_agent_sdk <span class="tok-key">import</span> query, ClaudeAgentOptions
+
+<span class="tok-key">async def</span> <span class="tok-fn">main</span>():
+    options = <span class="tok-fn">ClaudeAgentOptions</span>(
+        mcp_servers={
+            <span class="tok-str">"prime-fast-pay"</span>: {
+                <span class="tok-str">"command"</span>: <span class="tok-str">"prime-fast-pay-mcp"</span>,
+                <span class="tok-str">"env"</span>: {<span class="tok-str">"PRIME_FAST_PAY_API_KEY"</span>: <span class="tok-str">"sk_live_xxxxxxxx"</span>}
+            }
+        },
+        allowed_tools=[<span class="tok-str">"mcp__prime-fast-pay__*"</span>],
+        system_prompt=<span class="tok-str">"You send payouts. Always confirm the recipient, amount, and method before calling create_payout."</span>
+    )
+    <span class="tok-key">async for</span> message <span class="tok-key">in</span> <span class="tok-fn">query</span>(
+        prompt=<span class="tok-str">"Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP for invoice #4421."</span>,
+        options=options
+    ):
+        <span class="tok-key">if</span> message[<span class="tok-str">"type"</span>] == <span class="tok-str">"result"</span>:
+            <span class="tok-fn">print</span>(message[<span class="tok-str">"result"</span>])
+
+<span class="tok-fn">asyncio.run</span>(main())</pre>
+
+      <h3 id="langchain">LangChain</h3>
+      <p>LangChain loads MCP tools through <code>langchain-mcp-adapters</code> and runs them through a LangGraph React agent. Use this when you're already building on LangChain or LangGraph and want a single tool list across MCP and LangChain-native tools.</p>
+
+      <div class="code-label">Install</div>
+      <pre>pip install langchain langchain-anthropic langchain-mcp-adapters langgraph</pre>
+
+      <div class="code-label">agent.py</div>
+      <pre><span class="tok-key">import</span> asyncio
+<span class="tok-key">from</span> langchain_mcp_adapters.client <span class="tok-key">import</span> MultiServerMCPClient
+<span class="tok-key">from</span> langchain_anthropic <span class="tok-key">import</span> ChatAnthropic
+<span class="tok-key">from</span> langgraph.prebuilt <span class="tok-key">import</span> create_react_agent
+
+<span class="tok-key">async def</span> <span class="tok-fn">main</span>():
+    client = <span class="tok-fn">MultiServerMCPClient</span>({
+        <span class="tok-str">"prime-fast-pay"</span>: {
+            <span class="tok-str">"command"</span>: <span class="tok-str">"prime-fast-pay-mcp"</span>,
+            <span class="tok-str">"transport"</span>: <span class="tok-str">"stdio"</span>,
+            <span class="tok-str">"env"</span>: {<span class="tok-str">"PRIME_FAST_PAY_API_KEY"</span>: <span class="tok-str">"sk_live_xxxxxxxx"</span>}
+        }
+    })
+    tools = <span class="tok-key">await</span> client.<span class="tok-fn">get_tools</span>()
+    model = <span class="tok-fn">ChatAnthropic</span>(model=<span class="tok-str">"claude-opus-4-8"</span>)
+    agent = <span class="tok-fn">create_react_agent</span>(model, tools)
+    result = <span class="tok-key">await</span> agent.<span class="tok-fn">ainvoke</span>({
+        <span class="tok-str">"messages"</span>: [(<span class="tok-str">"user"</span>, <span class="tok-str">"Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP for invoice #4421."</span>)]
+    })
+    <span class="tok-fn">print</span>(result[<span class="tok-str">"messages"</span>][-1].content)
+
+<span class="tok-fn">asyncio.run</span>(main())</pre>
+
+      <h3 id="google-adk">Google ADK</h3>
+      <p>Google's Agent Development Kit ships an <code>McpToolset</code> that loads MCP tools into a Gemini-powered agent. Use it when you're building on Vertex AI or want Gemini as the reasoning engine.</p>
+
+      <div class="code-label">Install</div>
+      <pre>pip install google-adk</pre>
+
+      <div class="code-label">agent.py</div>
+      <pre><span class="tok-key">import</span> asyncio
+<span class="tok-key">from</span> google.adk.agents <span class="tok-key">import</span> LlmAgent
+<span class="tok-key">from</span> google.adk.tools.mcp_tool <span class="tok-key">import</span> McpToolset, StdioServerParameters
+<span class="tok-key">from</span> google.adk.runners <span class="tok-key">import</span> Runner
+<span class="tok-key">from</span> google.adk.sessions <span class="tok-key">import</span> InMemorySessionService
+<span class="tok-key">from</span> google.genai <span class="tok-key">import</span> types
+
+<span class="tok-key">async def</span> <span class="tok-fn">main</span>():
+    tools = <span class="tok-fn">McpToolset</span>(
+        connection_params=<span class="tok-fn">StdioServerParameters</span>(
+            command=<span class="tok-str">"prime-fast-pay-mcp"</span>,
+            env={<span class="tok-str">"PRIME_FAST_PAY_API_KEY"</span>: <span class="tok-str">"sk_live_xxxxxxxx"</span>}
+        )
+    )
+    agent = <span class="tok-fn">LlmAgent</span>(
+        model=<span class="tok-str">"gemini-2.5-flash"</span>,
+        name=<span class="tok-str">"payout_agent"</span>,
+        instruction=<span class="tok-str">"You send payouts. Always confirm the recipient, amount, and method before calling create_payout."</span>,
+        tools=[tools],
+    )
+    session_service = <span class="tok-fn">InMemorySessionService</span>()
+    runner = <span class="tok-fn">Runner</span>(agent=agent, app_name=<span class="tok-str">"prime-fast-pay"</span>, session_service=session_service)
+    session = <span class="tok-key">await</span> session_service.<span class="tok-fn">create_session</span>(
+        app_name=<span class="tok-str">"prime-fast-pay"</span>, user_id=<span class="tok-str">"user_123"</span>, session_id=<span class="tok-str">"session_456"</span>
+    )
+    content = types.<span class="tok-fn">Content</span>(
+        role=<span class="tok-str">"user"</span>,
+        parts=[types.Part(text=<span class="tok-str">"Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP for invoice #4421."</span>)]
+    )
+    <span class="tok-key">async for</span> event <span class="tok-key">in</span> runner.<span class="tok-fn">run_async</span>(
+        user_id=<span class="tok-str">"user_123"</span>, session_id=<span class="tok-str">"session_456"</span>, new_message=content
+    ):
+        <span class="tok-key">if</span> event.is_final_response():
+            <span class="tok-fn">print</span>(event.content.parts[0].text)
+
+<span class="tok-fn">asyncio.run</span>(main())</pre>
+
+      <h3 id="crewai">CrewAI</h3>
+      <p>CrewAI orchestrates role-based agents that collaborate on tasks. Use <code>MCPServerAdapter</code> from <code>crewai-tools</code> to wire Prime Fast Pay tools into any agent or crew — no custom tool classes required.</p>
+
+      <div class="code-label">Install</div>
+      <pre>pip install crewai crewai-tools</pre>
+
+      <div class="code-label">agent.py</div>
+      <pre><span class="tok-key">from</span> crewai <span class="tok-key">import</span> Agent, Task, Crew, Process, LLM
+<span class="tok-key">from</span> crewai_tools <span class="tok-key">import</span> MCPServerAdapter
+
+mcp_tools = <span class="tok-fn">MCPServerAdapter</span>({
+    <span class="tok-str">"prime-fast-pay"</span>: {
+        <span class="tok-str">"command"</span>: <span class="tok-str">"prime-fast-pay-mcp"</span>,
+        <span class="tok-str">"env"</span>: {<span class="tok-str">"PRIME_FAST_PAY_API_KEY"</span>: <span class="tok-str">"sk_live_xxxxxxxx"</span>}
+    }
+})
+
+agent = <span class="tok-fn">Agent</span>(
+    role=<span class="tok-str">"Payout Specialist"</span>,
+    goal=<span class="tok-str">"Send payouts accurately and confirm delivery."</span>,
+    backstory=<span class="tok-str">"You are an expert at managing outbound payments via Prime Fast Pay."</span>,
+    tools=mcp_tools,
+    llm=<span class="tok-fn">LLM</span>(model=<span class="tok-str">"anthropic/claude-opus-4-8"</span>),
+    verbose=<span class="tok-key">True</span>,
+)
+
+task = <span class="tok-fn">Task</span>(
+    description=<span class="tok-str">"Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP for invoice #4421. Return the payout ID."</span>,
+    expected_output=<span class="tok-str">"A short confirmation containing the payout ID returned by create_payout."</span>,
+    agent=agent,
+)
+
+crew = <span class="tok-fn">Crew</span>(agents=[agent], tasks=[task], process=Process.sequential)
+<span class="tok-fn">print</span>(crew.<span class="tok-fn">kickoff</span>())</pre>
+
+      <div class="callout"><strong>Pick a sandbox key while iterating.</strong> All four examples use <code>sk_live_</code> for brevity, but <code>sk_test_</code> keys route through the sandbox and never move real money — switch before you let an agent run unattended.</div>
+    </section>
+
+    <section class="doc-section" id="errors">
+      <h2>Error codes</h2>
+      <p>Errors return an error object with <code>type</code>, <code>message</code>, and optionally <code>code</code> and <code>param</code>.</p>
+      <table>
+        <tr><th>HTTP</th><th>Type</th><th>Meaning</th></tr>
+        <tr><td>400</td><td><code>bad_request</code></td><td>Invalid parameters. Check <code>param</code> for the offending field.</td></tr>
+        <tr><td>401</td><td><code>unauthorized</code></td><td>Invalid or missing API key.</td></tr>
+        <tr><td>402</td><td><code>insufficient_funds</code></td><td>Account balance too low for this payout.</td></tr>
+        <tr><td>404</td><td><code>resource_not_found</code></td><td>Payout or recipient ID does not exist.</td></tr>
+        <tr><td>409</td><td><code>idempotency_conflict</code></td><td>Idempotency key reused with different parameters.</td></tr>
+        <tr><td>422</td><td><code>recipient_unverified</code></td><td>Recipient failed KYC or bank verification.</td></tr>
+        <tr><td>429</td><td><code>rate_limit_exceeded</code></td><td>Too many requests. Retry after the <code>Retry-After</code> header value.</td></tr>
+        <tr><td>500</td><td><code>api_error</code></td><td>Temporary server error. Retry with exponential backoff.</td></tr>
+      </table>
+
+      <div class="code-label">Example error</div>
+      <pre>{
+  "error": {
+    "type": "bad_request",
+    "message": "Invalid routing number.",
+    "code": "invalid_routing_number",
+    "param": "bank_account.routing_number"
+  }
+}</pre>
+    </section>
+  </main>
+</div>
+
+</body>
+</html>

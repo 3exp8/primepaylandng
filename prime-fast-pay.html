@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prime Fast Pay — Money moves at AI Agent speed</title>
+<meta name="description" content="Your AI agent issues the payout. Prime Fast Pay picks the rail — ACH, RTP, FedNow, SEPA, SWIFT, push-to-card — and settles in seconds. Native MCP server, typed REST API.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+  :root{
+    --ink:#0A0D12;
+    --surface:#12171F;
+    --surface-2:#171D27;
+    --line:#232B37;
+    --text:#E8ECF1;
+    --muted:#8A93A3;
+    --faint:#5C6875;
+    --gold:#F0B94D;
+    --gold-dim:#8A6A2C;
+    --gold-wash:rgba(240,185,77,0.09);
+    --teal:#2EE6C4;
+    --teal-dim:#1B6E62;
+    --teal-wash:rgba(46,230,196,0.09);
+    --teal-line:rgba(46,230,196,0.32);
+    --radius:14px;
+    --radius-sm:8px;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  a{color:inherit;text-decoration:none;}
+
+  ::selection{background:var(--gold);color:var(--ink);}
+
+  :focus-visible{
+    outline:2px solid var(--teal);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+
+  .mono{font-family:var(--mono);}
+
+  /* ---------- NAV ---------- */
+  header{
+    position:fixed;
+    top:0;left:0;right:0;
+    z-index:50;
+    background:linear-gradient(to bottom, rgba(10,13,18,0.92), rgba(10,13,18,0));
+    backdrop-filter:blur(6px);
+  }
+  nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 32px;
+    max-width:1180px;
+    margin:0 auto;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--display);
+    font-weight:600;
+    font-size:17px;
+    letter-spacing:0.01em;
+  }
+  .logo-mark{
+    width:22px;height:22px;
+    position:relative;
+    flex-shrink:0;
+  }
+  .logo-mark svg{width:100%;height:100%;}
+  .nav-links{
+    display:flex;
+    gap:32px;
+    font-size:14px;
+    color:var(--muted);
+  }
+  .nav-links a{transition:color .18s ease;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-cta{
+    display:flex;
+    gap:16px;
+    align-items:center;
+  }
+  .btn{
+    font-family:var(--body);
+    font-size:14px;
+    font-weight:600;
+    padding:10px 20px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--text);
+    cursor:pointer;
+    transition:border-color .18s ease, background .18s ease, transform .12s ease, color .18s ease;
+    display:inline-block;
+    white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--teal);transform:translateY(-1px);}
+  .btn-primary{
+    background:var(--gold);
+    color:var(--ink);
+    border-color:var(--gold);
+  }
+  .btn-primary:hover{
+    background:#f5c66a;
+    border-color:#f5c66a;
+  }
+  @media (max-width:980px){
+    .nav-links{display:none;}
+  }
+  @media (max-width:560px){
+    .nav-cta .btn:not(.btn-primary){display:none;}
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    padding-top:90px;
+    overflow:hidden;
+  }
+  #hero-canvas{
+    position:absolute;
+    top:0;right:0;
+    width:64%;
+    height:100%;
+    pointer-events:none;
+  }
+  @media (max-width:900px){
+    #hero-canvas{width:100%;opacity:0.45;}
+  }
+  .hero-inner{
+    position:relative;
+    z-index:2;
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+    width:100%;
+  }
+  @media (max-width:640px){ .hero-inner{padding:0 20px;} }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--teal);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:24px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:7px;height:7px;
+    flex-shrink:0;
+    border-radius:50%;
+    background:var(--teal);
+    box-shadow:0 0 8px var(--teal);
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(40px, 6.4vw, 76px);
+    line-height:1.02;
+    letter-spacing:-0.02em;
+    max-width:680px;
+  }
+  h1 .accent{color:var(--gold);}
+  .hero-sub{
+    margin-top:26px;
+    font-size:18px;
+    line-height:1.6;
+    color:var(--muted);
+    max-width:520px;
+  }
+  .hero-actions{
+    margin-top:40px;
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .hero-actions .btn{padding:14px 26px;font-size:15px;}
+  .hero-foot{
+    margin-top:26px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--faint);
+  }
+
+  .ticker{
+    margin-top:72px;
+    border-top:1px solid var(--line);
+    padding-top:22px;
+    display:flex;
+    gap:48px;
+    flex-wrap:wrap;
+    font-family:var(--mono);
+  }
+  .ticker-item{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .ticker-label{
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .ticker-value{
+    font-size:20px;
+    font-weight:600;
+    color:var(--text);
+  }
+  .ticker-value.gold{color:var(--gold);}
+  .ticker-value.teal{color:var(--teal);}
+
+  /* ---------- SECTION SHARED ---------- */
+  section{
+    padding:120px 0;
+    position:relative;
+  }
+  @media (max-width:640px){ section{padding:84px 0;} }
+  .section-head{
+    max-width:640px;
+    margin-bottom:64px;
+  }
+  .kicker{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:14px;
+  }
+  h2{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:clamp(28px,3.4vw,40px);
+    letter-spacing:-0.01em;
+    line-height:1.15;
+  }
+  h3{font-family:var(--display);font-weight:600;letter-spacing:-0.005em;}
+  .section-sub{
+    margin-top:16px;
+    color:var(--muted);
+    font-size:16px;
+    max-width:560px;
+    line-height:1.65;
+  }
+
+  /* ---------- STAT BAND ---------- */
+  .band{
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+  }
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+  }
+  .stat{
+    padding:34px 30px;
+    border-left:1px solid var(--line);
+  }
+  .stat:first-child{border-left:none;}
+  @media (max-width:900px){
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .stat:nth-child(3){border-left:none;border-top:1px solid var(--line);}
+    .stat:nth-child(4){border-top:1px solid var(--line);}
+  }
+  @media (max-width:520px){
+    .stats-grid{grid-template-columns:1fr;}
+    .stat{border-left:none;border-top:1px solid var(--line);}
+    .stat:first-child{border-top:none;}
+  }
+  .stat-num{
+    font-family:var(--mono);
+    font-size:30px;
+    font-weight:600;
+    color:var(--teal);
+  }
+  .stat-num.gold{color:var(--gold);}
+  .stat-label{
+    margin-top:8px;
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.55;
+  }
+
+  /* ---------- FEATURE / PILLAR GRID ---------- */
+  .features{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .features.four{grid-template-columns:repeat(4,1fr);}
+  @media (max-width:900px){
+    .features.four{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:820px){
+    .features{grid-template-columns:1fr;}
+  }
+  @media (max-width:600px){
+    .features.four{grid-template-columns:1fr;}
+  }
+  .feature{
+    background:var(--surface);
+    padding:36px 32px;
+  }
+  .feature-icon{
+    width:38px;height:38px;
+    margin-bottom:26px;
+  }
+  .feature-index{
+    font-family:var(--mono);
+    font-size:11.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:16px;
+  }
+  .feature h3{
+    font-size:19px;
+    margin-bottom:12px;
+  }
+  .feature p{
+    color:var(--muted);
+    font-size:14.5px;
+    line-height:1.65;
+  }
+
+  /* ---------- RAIL TABLE ---------- */
+  .table-wrap{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+    background:var(--surface);
+  }
+  .table-scroll{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:620px;}
+  thead th{
+    text-align:left;
+    font-family:var(--mono);
+    font-weight:500;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    background:var(--surface-2);
+    padding:15px 20px;
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:15px 20px;
+    border-bottom:1px solid var(--line);
+    color:var(--muted);
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr{transition:background .15s ease;}
+  tbody tr:hover{background:rgba(255,255,255,0.02);}
+  td.name{color:var(--text);font-weight:500;}
+  td.speed,td.fee{font-family:var(--mono);color:var(--text);white-space:nowrap;}
+  .rail-dot{
+    display:inline-block;
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--teal);
+    margin-right:10px;
+    vertical-align:middle;
+  }
+  .rail-dot.instant{background:var(--gold);box-shadow:0 0 6px var(--gold);}
+  .table-note{
+    margin-top:16px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--faint);
+  }
+
+  /* ---------- ARCHITECTURE ---------- */
+  .arch-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+  }
+  @media (max-width:900px){ .arch-grid{grid-template-columns:1fr;} }
+  .arch-card{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:30px 28px;
+    background:var(--surface);
+    transition:border-color .18s ease, transform .18s ease;
+  }
+  .arch-card:hover{border-color:var(--teal-line);transform:translateY(-2px);}
+  .arch-card .tag{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--teal);
+  }
+  .arch-card h3{margin-top:14px;font-size:18px;}
+  .arch-card p{margin-top:12px;font-size:14.5px;color:var(--muted);line-height:1.65;}
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px;}
+  .chip{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--muted);
+    border:1px solid var(--line);
+    background:var(--surface);
+    padding:9px 16px;
+    border-radius:999px;
+  }
+  .chip .dot{color:var(--teal);margin-right:8px;}
+
+  /* ---------- PROCESS ---------- */
+  .steps{
+    position:relative;
+    margin-top:8px;
+  }
+  .steps::before{
+    content:'';
+    position:absolute;
+    left:23px;
+    top:16px;
+    bottom:16px;
+    width:1px;
+    background:linear-gradient(to bottom, var(--gold), var(--teal));
+    opacity:0.35;
+  }
+  .step{
+    position:relative;
+    display:grid;
+    grid-template-columns:48px 1fr;
+    gap:24px;
+    padding:24px 0;
+  }
+  .step-num{
+    width:48px;height:48px;
+    border-radius:50%;
+    background:var(--surface);
+    border:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:var(--mono);
+    font-size:14px;
+    color:var(--gold);
+    z-index:1;
+  }
+  .step h3{
+    font-size:18px;
+    margin-bottom:8px;
+  }
+  .step p{
+    color:var(--muted);
+    font-size:15px;
+    max-width:600px;
+    line-height:1.65;
+  }
+
+  /* ---------- RAILBOX (live routing diagram) ---------- */
+  .railbox{
+    border:1px solid var(--line);
+    background:var(--surface);
+    border-radius:var(--radius);
+    padding:22px 22px 20px;
+    position:relative;
+  }
+  .railbox-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:10px;
+  }
+  .railbox-title{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .railbox-live{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--teal);
+    display:flex;
+    align-items:center;
+    gap:7px;
+  }
+  .railbox-live::before{
+    content:'';
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--teal);
+    box-shadow:0 0 8px var(--teal);
+    animation:blink 2s infinite;
+  }
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+  .railbox svg{display:block;width:100%;height:auto;}
+  .railbox svg text{font-family:var(--mono);fill:var(--muted);}
+
+  /* ---------- SPLIT (CODE) ---------- */
+  .split{
+    display:grid;
+    grid-template-columns:0.92fr 1.08fr;
+    gap:56px;
+    align-items:center;
+  }
+  .split > *{min-width:0;}
+  .split.top{align-items:start;}
+  @media (max-width:960px){
+    .split{grid-template-columns:1fr;gap:40px;}
+  }
+  .code-panel{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    background:#0B1016;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .code-bar{
+    display:flex;
+    gap:7px;
+    align-items:center;
+    padding:13px 16px;
+    border-bottom:1px solid var(--line);
+    background:var(--surface-2);
+    flex:none;
+  }
+  .code-bar span{width:9px;height:9px;border-radius:50%;background:var(--line);flex:none;}
+  .code-bar span:first-child{background:var(--gold-dim);}
+  .code-bar span:nth-child(2){background:var(--teal-dim);}
+  .code-cap{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--faint);
+    padding:8px 16px;
+    border-top:1px solid var(--line);
+    background:#080C11;
+    display:flex;
+    justify-content:flex-end;
+  }
+  pre{
+    font-family:var(--mono);
+    font-size:12.5px;
+    line-height:1.72;
+    color:#B4C2CE;
+    padding:24px 22px;
+    overflow-x:auto;
+    min-width:0;
+  }
+  .tok-key{color:#8AB6E8;}
+  .tok-str{color:var(--teal);}
+  .tok-num{color:var(--gold);}
+  .tok-com{color:var(--faint);}
+
+  .feat-list{list-style:none;margin-top:28px;}
+  .feat-list li{
+    padding:14px 0;
+    border-top:1px solid var(--line);
+    font-size:14.5px;
+    color:var(--muted);
+    display:flex;
+    gap:14px;
+    line-height:1.6;
+  }
+  .feat-list li:first-child{border-top:none;}
+  .feat-list b{color:var(--text);font-weight:600;}
+  .feat-list .num{
+    font-family:var(--mono);
+    color:var(--gold);
+    font-size:12.5px;
+    padding-top:2px;
+    flex:none;
+  }
+
+  /* ---------- AGENTS ---------- */
+  .agent-section{
+    background:var(--surface);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .install-line{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--teal);
+    background:#0B1016;
+    border:1px solid var(--line);
+    border-radius:var(--radius-sm);
+    padding:13px 16px;
+    margin-top:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    overflow-x:auto;
+  }
+  .install-line::before{content:'$';color:var(--faint);flex:none;}
+  .tool-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+  .tool-pill{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--muted);
+    border:1px solid var(--line);
+    background:var(--ink);
+    border-radius:999px;
+    padding:6px 13px;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .tool-pill:hover{border-color:var(--teal-line);color:var(--teal);}
+  .framework-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+    margin-top:28px;
+  }
+  @media (max-width:560px){ .framework-grid{grid-template-columns:1fr;} }
+  .framework{
+    background:var(--ink);
+    padding:22px 22px;
+    display:flex;
+    gap:15px;
+  }
+  .fw-badge{
+    width:36px;height:36px;flex:none;
+    border-radius:var(--radius-sm);
+    background:var(--teal-wash);
+    border:1px solid var(--teal-line);
+    display:grid;place-items:center;
+    font-family:var(--mono);font-weight:600;font-size:12px;
+    color:var(--teal);
+  }
+  .framework h3{font-size:14.5px;}
+  .framework p{margin-top:5px;font-size:13px;color:var(--muted);line-height:1.55;}
+  .agent-note{
+    margin-top:24px;
+    font-size:13px;
+    color:var(--muted);
+    font-family:var(--mono);
+    line-height:1.6;
+    border-left:2px solid var(--gold);
+    padding:12px 16px;
+    background:var(--gold-wash);
+    border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  /* ---------- SECURITY ---------- */
+  .sec-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  @media (max-width:900px){ .sec-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:620px){ .sec-grid{grid-template-columns:1fr;} }
+  .sec-item{
+    background:var(--surface);
+    padding:28px 26px;
+    display:flex;
+    gap:16px;
+  }
+  .sec-icon{
+    width:34px;height:34px;flex:none;
+    border:1px solid var(--teal-line);
+    background:var(--teal-wash);
+    border-radius:var(--radius-sm);
+    display:grid;place-items:center;
+    color:var(--teal);
+    font-family:var(--mono);font-size:13px;
+  }
+  .sec-item h3{font-size:15.5px;}
+  .sec-item p{margin-top:7px;font-size:13.5px;color:var(--muted);line-height:1.6;}
+
+  /* ---------- VERTICALS ---------- */
+  .vert-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+  }
+  @media (max-width:900px){ .vert-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .vert-grid{grid-template-columns:1fr;} }
+  .vert{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px;
+    background:var(--surface);
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .vert:hover{border-color:var(--teal-line);transform:translateY(-2px);}
+  .vert-label{font-family:var(--mono);font-size:11px;color:var(--faint);}
+  .vert h3{margin-top:10px;font-size:15.5px;}
+
+  /* ---------- CHAINS ---------- */
+  .chains-strip{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+  }
+  .chain-pill{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 20px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    font-family:var(--mono);
+    font-size:13.5px;
+    color:var(--text);
+    background:var(--surface);
+  }
+  .chain-dot{
+    width:8px;height:8px;
+    border-radius:50%;
+    flex:none;
+  }
+
+  /* ---------- CTA ---------- */
+  .cta-section{
+    background:var(--surface);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .cta-section::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at 50% 0%, rgba(240,185,77,0.08), transparent 62%);
+    pointer-events:none;
+  }
+  .cta-inner{
+    text-align:center;
+    max-width:640px;
+    margin:0 auto;
+    position:relative;
+    z-index:2;
+  }
+  .cta-inner h2{max-width:none;}
+  .cta-inner .kicker{display:flex;justify-content:center;}
+  .cta-inner .section-sub{margin-left:auto;margin-right:auto;}
+  .cta-actions{
+    margin-top:34px;
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{padding:56px 0 40px;}
+  .footer-inner{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:20px;
+    border-top:1px solid var(--line);
+    padding-top:32px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .footer-links{display:flex;gap:26px;flex-wrap:wrap;}
+  .footer-links a:hover{color:var(--text);}
+  .footer-fine{
+    margin-top:20px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--faint);
+  }
+
+  /* ---------- REVEAL ---------- */
+  html.js .reveal{
+    opacity:0;
+    transform:translateY(18px);
+    transition:opacity .6s cubic-bezier(.22,.61,.36,1), transform .6s cubic-bezier(.22,.61,.36,1);
+    will-change:opacity, transform;
+  }
+  html.js .reveal.in{opacity:1;transform:none;}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation:none !important;}
+    html.js .reveal{opacity:1;transform:none;transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="#" class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" stroke="#F0B94D" stroke-width="1.4"/>
+          <path d="M12 2V22M3 7L21 17M21 7L3 17" stroke="#2EE6C4" stroke-width="1" opacity="0.6"/>
+        </svg>
+      </span>
+      Prime Fast Pay
+    </a>
+    <div class="nav-links">
+      <a href="#agents">Agents</a>
+      <a href="#rails">Rails</a>
+      <a href="#platform">Platform</a>
+      <a href="#security">Security</a>
+      <a href="#verticals">Who it's for</a>
+      <a href="docs.html">Docs</a>
+    </div>
+    <div class="nav-cta">
+      <a href="docs.html" class="btn">Read the docs</a>
+      <a href="#start" class="btn btn-primary">Get API access</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div id="hero-canvas"></div>
+  <div class="hero-inner">
+    <div class="eyebrow">Works with Google ADK, Claude Agent SDK, CrewAI, LangChain, Open Claw</div>
+    <h1>Money moves at <span class="accent">AI Agent</span> speed.</h1>
+    <p class="hero-sub">Tell your agent to send the money. Prime Fast Pay picks the rail, runs the checks, and settles in seconds.</p>
+    <div class="hero-actions">
+      <a href="#start" class="btn btn-primary">Get API access</a>
+      <a href="#agents" class="btn">See the agent stack</a>
+    </div>
+    <div class="hero-foot">$ prime-fast-pay-mcp · create_payout → confirmed in &lt;30s · no batch files, no T+3 wait</div>
+    <div class="ticker">
+      <div class="ticker-item">
+        <span class="ticker-label">API p95 latency</span>
+        <span class="ticker-value gold">&lt;250ms</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">Instant-rail confirm</span>
+        <span class="ticker-value teal">&lt;30s</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">Rails, one API</span>
+        <span class="ticker-value">9</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">Reconciliation</span>
+        <span class="ticker-value">Automatic</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STAT BAND ================= -->
+<div class="band">
+  <div class="wrap stats-grid">
+    <div class="stat">
+      <div class="stat-num gold">&lt;250ms</div>
+      <div class="stat-label">API response time, p95, at 5,000 req/s sustained</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">&lt;30s</div>
+      <div class="stat-label">Payout confirmation on real-time rails, p95</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">9</div>
+      <div class="stat-label">Payment rails behind a single API</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">160+</div>
+      <div class="stat-label">Countries reachable by international wire</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= AI AGENTS ================= -->
+<section class="agent-section" id="agents">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">AI agent integrations</div>
+      <h2>Don't call the API. Tell an agent to.</h2>
+      <p class="section-sub">Prime Fast Pay ships a native MCP server that exposes every endpoint as a typed tool. Point any MCP-speaking agent framework at it and let the model handle the call — no glue code, no per-SDK adapters to maintain.</p>
+    </div>
+
+    <div class="split top">
+      <div class="reveal">
+        <div class="install-line">cargo install prime-fast-pay-mcp</div>
+        <div class="install-line">export PRIME_FAST_PAY_API_KEY=sk_live_xxxxxxxx</div>
+
+        <div class="tool-list">
+          <span class="tool-pill">create_payout</span>
+          <span class="tool-pill">retrieve_payout</span>
+          <span class="tool-pill">list_payouts</span>
+          <span class="tool-pill">cancel_payout</span>
+          <span class="tool-pill">create_recipient</span>
+          <span class="tool-pill">retrieve_recipient</span>
+          <span class="tool-pill">list_recipients</span>
+        </div>
+
+        <div class="framework-grid">
+          <div class="framework">
+            <div class="fw-badge">CA</div>
+            <div>
+              <h3>Claude Agent SDK</h3>
+              <p>A managed agent loop with MCP access built in — no prompt orchestration to write yourself.</p>
+            </div>
+          </div>
+          <div class="framework">
+            <div class="fw-badge">LC</div>
+            <div>
+              <h3>LangChain / LangGraph</h3>
+              <p>Loads Prime Fast Pay tools through langchain-mcp-adapters into a React agent.</p>
+            </div>
+          </div>
+          <div class="framework">
+            <div class="fw-badge">GA</div>
+            <div>
+              <h3>Google ADK</h3>
+              <p>An McpToolset drops the tools straight into a Gemini-powered agent on Vertex AI.</p>
+            </div>
+          </div>
+          <div class="framework">
+            <div class="fw-badge">CR</div>
+            <div>
+              <h3>CrewAI</h3>
+              <p>Wire payouts into any role-based crew with MCPServerAdapter — no custom tool classes.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="agent-note">⚠ Use an sk_test_ key while iterating — it routes to the sandbox and never moves real money. Switch keys before letting an agent run unattended.</div>
+      </div>
+
+      <div class="code-panel reveal">
+        <div class="code-bar"><span></span><span></span><span></span></div>
+        <div class="code-cap">agent.py</div>
+        <pre><span class="tok-com"># Claude Agent SDK — agent.py</span>
+options = <span class="tok-key">ClaudeAgentOptions</span>(
+    mcp_servers={
+        <span class="tok-str">"prime-fast-pay"</span>: {
+            <span class="tok-key">"command"</span>: <span class="tok-str">"prime-fast-pay-mcp"</span>,
+            <span class="tok-key">"env"</span>: {<span class="tok-str">"PRIME_FAST_PAY_API_KEY"</span>: <span class="tok-str">"sk_live_xxxxxxxx"</span>}
+        }
+    },
+    allowed_tools=[<span class="tok-str">"mcp__prime-fast-pay__*"</span>],
+    system_prompt=<span class="tok-str">"You send payouts. Always confirm the </span>
+<span class="tok-str">recipient, amount, and method before calling create_payout."</span>
+)
+
+<span class="tok-key">async for</span> message <span class="tok-key">in</span> query(
+    prompt=<span class="tok-str">"Pay John Doe (rec_9x8y7z6w5v4u) $250 via RTP </span>
+<span class="tok-str">for invoice #4421."</span>,
+    options=options
+):
+    <span class="tok-key">if</span> message[<span class="tok-str">"type"</span>] == <span class="tok-str">"result"</span>:
+        print(message[<span class="tok-str">"result"</span>])
+
+<span class="tok-com"># → Confirmed: po_4k29dLmz, $250.00 via RTP,</span>
+<span class="tok-com">#   submitted to rec_9x8y7z6w5v4u</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PILLARS ================= -->
+<section id="product">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">Why teams switch</div>
+      <h2>Built to replace the batch file, not sit next to it.</h2>
+      <p class="section-sub">Corporate banking portals move money on their own schedule. Prime Fast Pay moves it on yours — with the status, control, and reach a real disbursement program needs.</p>
+    </div>
+    <div class="features four reveal">
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M20 6L8 21H19L18 34L32 17H21L20 6Z" stroke="#F0B94D" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="feature-index">Speed</div>
+        <h3>Seconds, not days</h3>
+        <p>Payouts move in seconds on instant rails — FedNow, RTP, SEPA Instant, Visa Direct — and same-day everywhere else. No T+1 to T+3 wait.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="4" stroke="#F0B94D" stroke-width="1.4"/><circle cx="8" cy="10" r="2.5" stroke="#2EE6C4" stroke-width="1.4"/><circle cx="32" cy="10" r="2.5" stroke="#2EE6C4" stroke-width="1.4"/><circle cx="8" cy="30" r="2.5" stroke="#2EE6C4" stroke-width="1.4"/><circle cx="32" cy="30" r="2.5" stroke="#2EE6C4" stroke-width="1.4"/><path d="M20 16V10M23.5 17.5L30 11M23.5 22.5L30 29M16.5 22.5L10 29M16.5 17.5L10 11" stroke="#3A4453" stroke-width="1"/></svg>
+        </div>
+        <div class="feature-index">Reach</div>
+        <h3>One integration, every rail</h3>
+        <p>Send to any supported rail and currency without opening a new banking relationship for every corridor you enter.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M12 14a10 10 0 1 1 -1.5 12" stroke="#2EE6C4" stroke-width="1.4" stroke-linecap="round"/><path d="M12 8v6h6" stroke="#F0B94D" stroke-width="1.4" stroke-linejoin="round"/><circle cx="20" cy="20" r="2" stroke="#3A4453" stroke-width="1.2"/></svg>
+        </div>
+        <div class="feature-index">Reliability</div>
+        <h3>Retries and reroutes on its own</h3>
+        <p>If a rail degrades, Prime Fast Pay falls back automatically, so a temporary outage on one network doesn't leave a payout stuck.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect x="9" y="9" width="10" height="10" rx="1" stroke="#2EE6C4" stroke-width="1.3"/><rect x="21" y="21" width="10" height="10" rx="1" stroke="#2EE6C4" stroke-width="1.3"/><path d="M19 14H26C28.2 14 30 15.8 30 18V21" stroke="#3A4453" stroke-width="1.2"/><path d="M21 26H14C11.8 26 10 24.2 10 22V19" stroke="#3A4453" stroke-width="1.2"/></svg>
+        </div>
+        <div class="feature-index">Transparency</div>
+        <h3>You always know where a payout is</h3>
+        <p>Real-time status, granular reporting, and role-based approvals replace the opaque batch files of a banking portal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RAILS ================= -->
+<section id="rails">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">Coverage</div>
+      <h2>Pick the rail. We handle the rest.</h2>
+      <p class="section-sub">Every rail is reachable through the same request shape. Route by currency, speed, and destination — Prime Fast Pay picks the corridor and falls back automatically if one is unavailable.</p>
+    </div>
+
+    <div class="split reveal" style="margin-bottom:64px;">
+      <div>
+        <div class="kicker">Routing engine</div>
+        <h2 style="font-size:clamp(22px,2.4vw,28px);">One endpoint. Nine rails. Live now.</h2>
+        <p class="section-sub">A single <span class="mono">POST /v1/payouts</span> arrives, the routing engine picks the cheapest instant rail for that corridor, and the funds leave. If a rail degrades mid-flight, the packet reroutes instead of stalling.</p>
+        <div class="chip-row" style="margin-top:18px;">
+          <span class="chip"><span class="dot">●</span>Corridor scoring</span>
+          <span class="chip"><span class="dot">●</span>Auto-fallback</span>
+          <span class="chip"><span class="dot">●</span>Per-rail webhooks</span>
+        </div>
+      </div>
+
+      <div class="railbox">
+        <div class="railbox-head">
+          <div class="railbox-title">Disbursement routing</div>
+          <div class="railbox-live">live</div>
+        </div>
+        <svg viewBox="0 0 460 300" role="img" aria-label="Diagram showing multiple payment rails converging into the Prime Fast Pay API and out to a recipient">
+          <g fill="none" stroke="#2EE6C4" stroke-width="1.4" opacity="0.28">
+            <path d="M20,30 C120,30 140,145 210,150"/>
+            <path d="M20,80 C120,80 150,140 210,150"/>
+            <path d="M20,130 C130,130 170,145 210,150"/>
+            <path d="M20,180 C130,180 170,155 210,150"/>
+            <path d="M20,230 C120,230 150,160 210,150"/>
+            <path d="M20,270 C120,270 140,160 210,150"/>
+          </g>
+          <g fill="#2EE6C4">
+            <circle r="3"><animateMotion dur="3.6s" repeatCount="indefinite" path="M20,30 C120,30 140,145 210,150"/></circle>
+            <circle r="3"><animateMotion dur="4.1s" begin="0.4s" repeatCount="indefinite" path="M20,80 C120,80 150,140 210,150"/></circle>
+            <circle r="3"><animateMotion dur="3.2s" begin="0.9s" repeatCount="indefinite" path="M20,130 C130,130 170,145 210,150"/></circle>
+            <circle r="3"><animateMotion dur="3.9s" begin="1.3s" repeatCount="indefinite" path="M20,180 C130,180 170,155 210,150"/></circle>
+            <circle r="3"><animateMotion dur="3.4s" begin="0.6s" repeatCount="indefinite" path="M20,230 C120,230 150,160 210,150"/></circle>
+            <circle r="3"><animateMotion dur="4.4s" begin="1.6s" repeatCount="indefinite" path="M20,270 C120,270 140,160 210,150"/></circle>
+          </g>
+          <g font-size="11">
+            <text x="20" y="24" fill="#8A93A3">ACH</text>
+            <text x="20" y="74" fill="#8A93A3">RTP</text>
+            <text x="20" y="124" fill="#8A93A3">FedNow</text>
+            <text x="20" y="174" fill="#8A93A3">SEPA</text>
+            <text x="20" y="224" fill="#8A93A3">SWIFT</text>
+            <text x="20" y="264" fill="#8A93A3">Cards</text>
+          </g>
+          <rect x="210" y="130" width="90" height="40" rx="4" fill="#10171F" stroke="#2EE6C4" stroke-width="1.2"/>
+          <text x="255" y="154" font-size="11" text-anchor="middle" fill="#2EE6C4" font-weight="600">Prime Fast Pay</text>
+          <path d="M300,150 C360,150 380,150 440,150" fill="none" stroke="#F0B94D" stroke-width="1.4" opacity="0.5"/>
+          <circle r="3.5" fill="#F0B94D">
+            <animateMotion dur="2.4s" repeatCount="indefinite" path="M300,150 C360,150 380,150 440,150"/>
+          </circle>
+          <circle cx="446" cy="150" r="5" fill="none" stroke="#F0B94D" stroke-width="1.4"/>
+          <text x="380" y="130" font-size="11" text-anchor="middle" fill="#8A93A3">Recipient</text>
+          <text x="255" y="190" font-size="9" text-anchor="middle" fill="#5C6875">POST /v1/payouts</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="table-wrap reveal">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Rail</th><th>Speed</th><th>Indicative fee</th><th>Coverage</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="name"><span class="rail-dot"></span>ACH (Standard &amp; Same-Day)</td><td class="speed">1–2 business days</td><td class="fee">$0.25</td><td>United States</td></tr>
+            <tr><td class="name"><span class="rail-dot instant"></span>RTP</td><td class="speed">Seconds, 24/7</td><td class="fee">$0.50</td><td>United States</td></tr>
+            <tr><td class="name"><span class="rail-dot instant"></span>FedNow</td><td class="speed">Seconds, 24/7</td><td class="fee">$0.50</td><td>United States</td></tr>
+            <tr><td class="name"><span class="rail-dot"></span>Push-to-Card</td><td class="speed">Minutes</td><td class="fee">1.5% of amount</td><td>US, CA, UK</td></tr>
+            <tr><td class="name"><span class="rail-dot instant"></span>Virtual Card Issuance</td><td class="speed">Instant</td><td class="fee">$1.00</td><td>US, CA</td></tr>
+            <tr><td class="name"><span class="rail-dot"></span>Digital Check</td><td class="speed">1–3 business days</td><td class="fee">$0.50</td><td>United States</td></tr>
+            <tr><td class="name"><span class="rail-dot"></span>International Wire (SWIFT)</td><td class="speed">Same day</td><td class="fee">$15.00</td><td>160+ countries</td></tr>
+            <tr><td class="name"><span class="rail-dot"></span>SEPA SCT</td><td class="speed">Next business day</td><td class="fee">€0.20</td><td>SEPA zone</td></tr>
+            <tr><td class="name"><span class="rail-dot instant"></span>SEPA Instant</td><td class="speed">Seconds, 24/7</td><td class="fee">€0.30</td><td>SEPA zone</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="table-note reveal">● gold marker = settles in seconds, 24/7 · fees indicative, corridor pricing on request</div>
+  </div>
+</section>
+
+<!-- ================= PLATFORM ================= -->
+<section id="platform">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">Architecture</div>
+      <h2>Three layers, one payout lifecycle.</h2>
+      <p class="section-sub">Every instruction moves through the same disciplined path — validated, screened, reserved against a ledger, routed, and reconciled — regardless of which rail it lands on, and regardless of whether a human or an agent sent it.</p>
+    </div>
+    <div class="arch-grid reveal">
+      <div class="arch-card">
+        <div class="tag">01 · Orchestration</div>
+        <h3>Payout orchestration layer</h3>
+        <p>Receives each instruction, validates it, reserves funds against the ledger, selects the best rail, and tracks the payout through to confirmation — behind one uniform interface.</p>
+      </div>
+      <div class="arch-card">
+        <div class="tag">02 · Interface</div>
+        <h3>Merchant &amp; agent interface layer</h3>
+        <p>A REST API and SDKs for automated flows, an MCP server for agent frameworks, a dashboard for manual payouts and approvals, and webhooks that keep your systems synced with every status change.</p>
+      </div>
+      <div class="arch-card">
+        <div class="tag">03 · Compliance</div>
+        <h3>Compliance, risk &amp; reconciliation</h3>
+        <p>Recipient verification, sanctions screening, and velocity limits run before funds are ever reserved. Settlement is reconciled automatically against every rail's reports.</p>
+      </div>
+    </div>
+    <div class="chip-row reveal">
+      <span class="chip"><span class="dot">●</span>Event-driven &amp; auditable</span>
+      <span class="chip"><span class="dot">●</span>Ledger as source of truth</span>
+      <span class="chip"><span class="dot">●</span>Rail-agnostic by design</span>
+      <span class="chip"><span class="dot">●</span>Zero-trust networking</span>
+      <span class="chip"><span class="dot">●</span>Multi-region, active-passive</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LIFECYCLE ================= -->
+<section id="how-it-works">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">How it works</div>
+      <h2>Five steps, in the order they actually happen.</h2>
+      <p class="section-sub">This is the real sequence a payout moves through — nothing here is reordered for a pitch.</p>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div>
+          <h3>Instruction received</h3>
+          <p>A typed request lands from your backend, the dashboard, or an agent calling <span class="mono">create_payout</span> over MCP. The same validation runs either way — an agent gets no shortcut past it.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div>
+          <h3>Screening runs first</h3>
+          <p>Recipient verification, sanctions and PEP screening, and velocity limits execute before a single cent is reserved. The payout cannot advance until they clear — that ordering is enforced by the code path, not documented in a runbook.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div>
+          <h3>Funds reserved on the ledger</h3>
+          <p>The amount posts to a double-entry ledger tied to your account. A balance is never just a number in a row — it's the sum of entries you can always trace back.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div>
+          <h3>Rail selected and routed</h3>
+          <p>Funds leave on whichever rail is fastest and cheapest for that currency and destination at that moment. If it degrades mid-flight, the payout reroutes instead of getting stuck.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div>
+          <h3>Confirmed and reconciled</h3>
+          <p>Webhooks fire on every state change, and settlement is reconciled automatically against each rail's own reports — so month end is a report you read, not a spreadsheet you build.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DEVELOPER EXPERIENCE ================= -->
+<section class="band" id="docs">
+  <div class="wrap split">
+    <div class="reveal">
+      <div class="kicker">Developer experience</div>
+      <h2>A payout is one request away.</h2>
+      <p class="section-sub">Send an instruction, get a payout object back, and watch it move through status via webhook — no rail-specific formatting to learn.</p>
+      <ul class="feat-list">
+        <li><span class="num">01</span><span><b>Free sandbox, no card required.</b> Full API functionality — most engineers send a first test payout in under an hour.</span></li>
+        <li><span class="num">02</span><span><b>SDKs for iOS, Android, Flutter, and REST.</b> Recipient bank details are tokenized in the SDK, so sensitive data never touches your servers.</span></li>
+        <li><span class="num">03</span><span><b>Webhooks for every state change.</b> <span class="mono">payout.created</span>, <span class="mono">payout.processing</span>, <span class="mono">payout.completed</span>, <span class="mono">payout.failed</span>.</span></li>
+        <li><span class="num">04</span><span><b>Integration engineering support.</b> Available at no cost to qualified teams during evaluation.</span></li>
+      </ul>
+    </div>
+    <div class="code-panel reveal">
+      <div class="code-bar"><span></span><span></span><span></span></div>
+      <div class="code-cap">POST /v1/payouts</div>
+      <pre><span class="tok-com">// Create a payout</span>
+<span class="tok-key">POST</span> /v1/payouts
+<span class="tok-key">Host:</span> api.primefastpay.com
+<span class="tok-key">Authorization:</span> Bearer sk_live_xxxxxxxx
+<span class="tok-key">Idempotency-Key:</span> 3b1e9c2f-6a0b-4f5d
+
+{
+  <span class="tok-key">"amount"</span>: <span class="tok-num">250000</span>,
+  <span class="tok-key">"currency"</span>: <span class="tok-str">"USD"</span>,
+  <span class="tok-key">"recipient_id"</span>: <span class="tok-str">"rec_9x8y7z6w"</span>,
+  <span class="tok-key">"method"</span>: <span class="tok-str">"rtp"</span>,
+  <span class="tok-key">"description"</span>: <span class="tok-str">"Invoice #4421"</span>
+}
+
+<span class="tok-com">// Response</span>
+{
+  <span class="tok-key">"id"</span>: <span class="tok-str">"po_4k29dLmz"</span>,
+  <span class="tok-key">"status"</span>: <span class="tok-str">"submitted"</span>,
+  <span class="tok-key">"eta"</span>: <span class="tok-str">"2026-08-17T14:02:31Z"</span>
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SECURITY ================= -->
+<section id="security">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">Trust &amp; controls</div>
+      <h2>Handled like it needs to survive an audit — because it does.</h2>
+      <p class="section-sub">Prime Fast Pay is built with the controls a payout gateway needs, not the ones a checkout page can get away with.</p>
+    </div>
+    <div class="sec-grid reveal">
+      <div class="sec-item">
+        <div class="sec-icon">◆</div>
+        <div><h3>Segregated merchant funds</h3><p>Merchant balances sit in accounts structurally separate from Prime Fast Pay's operating funds, reconciled daily.</p></div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-icon">✓</div>
+        <div><h3>Screening before every reserve</h3><p>Sanctions, PEP, and fraud checks run on every instruction before funds are ever reserved — not as an afterthought.</p></div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-icon">⇄</div>
+        <div><h3>Zero-trust networking</h3><p>Mutual TLS on every service-to-service call. No compute instance carries a public IP.</p></div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-icon">■</div>
+        <div><h3>Encrypted, key-managed</h3><p>AES-256-GCM at rest, TLS 1.3 in transit, ledger data protected with HSM-backed keys.</p></div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-icon">▲</div>
+        <div><h3>Multi-region by default</h3><p>Active-passive deployment across primary and disaster-recovery regions, tested with quarterly failover exercises.</p></div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-icon">≡</div>
+        <div><h3>Full audit trail</h3><p>Every payout's lifecycle is preserved as an immutable event, so any transaction can be reconstructed end-to-end.</p></div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-icon">⌘</div>
+        <div><h3>Scoped agent keys</h3><p>An <span class="mono">sk_test_</span> key routes to the sandbox and never moves real money. Production keys can be scoped per tool, per amount ceiling.</p></div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-icon">◷</div>
+        <div><h3>Human-in-the-loop approvals</h3><p>Role-based approval thresholds hold an agent-initiated payout for sign-off above whatever limit you set.</p></div>
+      </div>
+      <div class="sec-item">
+        <div class="sec-icon">⊘</div>
+        <div><h3>Idempotent by contract</h3><p>Every write takes an idempotency key, so a retrying agent can't double-send a payout.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VERTICALS ================= -->
+<section id="verticals">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="kicker">Who it's for</div>
+      <h2>Built for platforms that pay a lot of people.</h2>
+      <p class="section-sub">If your business sends payouts to a distributed base of recipients rather than accepting payments from them, Prime Fast Pay is built around your problem.</p>
+    </div>
+    <div class="vert-grid reveal">
+      <div class="vert"><div class="vert-label">01</div><h3>Marketplaces &amp; platforms</h3></div>
+      <div class="vert"><div class="vert-label">02</div><h3>Gig &amp; creator economy</h3></div>
+      <div class="vert"><div class="vert-label">03</div><h3>Affiliate &amp; ad-tech networks</h3></div>
+      <div class="vert"><div class="vert-label">04</div><h3>Insurance carriers</h3></div>
+      <div class="vert"><div class="vert-label">05</div><h3>Brokerages &amp; fintechs</h3></div>
+      <div class="vert"><div class="vert-label">06</div><h3>Corporate contractor payments</h3></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="cta-section" id="start">
+  <div class="wrap cta-inner">
+    <div class="kicker">Get started</div>
+    <h2>Send your first payout today.</h2>
+    <p class="section-sub">Spin up a sandbox in minutes, or talk to our team about your corridors, volume, and rollout. Production access needs a short compliance conversation first.</p>
+    <div class="cta-actions">
+      <a href="mailto:hello@primefastpay.com" class="btn btn-primary">Start in the sandbox</a>
+      <a href="docs.html" class="btn">Read the docs</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" stroke="#F0B94D" stroke-width="1.4"/>
+            <path d="M12 2V22M3 7L21 17M21 7L3 17" stroke="#2EE6C4" stroke-width="1" opacity="0.6"/>
+          </svg>
+        </span>
+        Prime Fast Pay
+      </div>
+      <div class="footer-links">
+        <a href="#agents">Agents</a>
+        <a href="#rails">Rails</a>
+        <a href="#platform">Platform</a>
+        <a href="#security">Security</a>
+        <a href="docs.html">Docs</a>
+        <a href="mailto:support@primefastpay.com">Support</a>
+      </div>
+    </div>
+    <div class="footer-fine">© 2026 Prime Fast Pay. A payout gateway platform — outbound disbursements only, no card acceptance, no checkout. Built on typestate-safe rails.</div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var mount = document.getElementById('hero-canvas');
+  if (!mount) return;
+  if (typeof THREE === 'undefined'){
+    console.warn('Three.js failed to load from CDN — hero animation skipped.');
+    return;
+  }
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(48, mount.clientWidth / mount.clientHeight, 0.1, 100);
+  camera.position.set(0, 1.4, 13.5);
+  camera.lookAt(0, 0, 0);
+
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(mount.clientWidth, mount.clientHeight);
+  mount.appendChild(renderer.domElement);
+
+  var group = new THREE.Group();
+  group.scale.setScalar(0.001);
+  group.position.x = 1.6;
+  scene.add(group);
+
+  var COLOR_GOLD = 0xF0B94D;
+  var COLOR_TEAL = 0x2EE6C4;
+  var COLOR_LINE = 0x3A4453;
+
+  function glowTexture(hex){
+    var c = document.createElement('canvas');
+    c.width = c.height = 128;
+    var ctx = c.getContext('2d');
+    var g = ctx.createRadialGradient(64,64,0,64,64,64);
+    g.addColorStop(0, hex + 'FF');
+    g.addColorStop(0.45, hex + '66');
+    g.addColorStop(1, hex + '00');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,128,128);
+    return new THREE.CanvasTexture(c);
+  }
+  var goldTex = glowTexture('#F0B94D');
+  var tealTex = glowTexture('#2EE6C4');
+
+  // ---- thin coordinate axes through the origin, for an instrument-panel feel ----
+  var AXIS_LEN = 7.2;
+  [
+    [[-AXIS_LEN,0,0],[AXIS_LEN,0,0]],
+    [[0,-AXIS_LEN,0],[0,AXIS_LEN,0]],
+    [[0,0,-AXIS_LEN],[0,0,AXIS_LEN]]
+  ].forEach(function(pair){
+    var g = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(pair[0][0], pair[0][1], pair[0][2]),
+      new THREE.Vector3(pair[1][0], pair[1][1], pair[1][2])
+    ]);
+    var m = new THREE.LineBasicMaterial({ color: COLOR_LINE, transparent: true, opacity: 0.14 });
+    group.add(new THREE.Line(g, m));
+  });
+
+  // ---- settlement core: a torus knot, the one point every orbit resolves to ----
+  var coreGeo = new THREE.TorusKnotGeometry(1.05, 0.3, 128, 12, 2, 3);
+  var coreMat = new THREE.MeshBasicMaterial({ color: COLOR_GOLD, wireframe: true, transparent: true, opacity: 0.48 });
+  var core = new THREE.Mesh(coreGeo, coreMat);
+  group.add(core);
+
+  var coreGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: goldTex, transparent: true, opacity: 0.42, depthWrite:false }));
+  coreGlow.scale.set(4.2, 4.2, 1);
+  group.add(coreGlow);
+
+  // ---- outer wireframe shell, a bounding sphere for the whole settlement network ----
+  var shellGeo = new THREE.SphereGeometry(6.6, 16, 10);
+  var shellMat = new THREE.MeshBasicMaterial({ color: COLOR_LINE, wireframe: true, transparent: true, opacity: 0.07 });
+  var shell = new THREE.Mesh(shellGeo, shellMat);
+  group.add(shell);
+
+  // ---- rail nodes on evenly-spaced, individually-inclined circular orbits ----
+  // One node per payment rail. Each orbital plane is tilted and yawed by a fixed,
+  // evenly-distributed amount — the same construction used to distribute
+  // satellites across a constellation.
+  var RAILS = ['ACH', 'RTP', 'FedNow', 'SEPA', 'SWIFT', 'Cards'];
+  var nodeCount = RAILS.length;
+  var orbitRadius = 5.2;
+  var omega = 0.22; // rad/s, shared by every node so the constellation reads as one system
+  var nodes = [];
+
+  function orbitPoint(theta, tilt, yaw, r){
+    var v = new THREE.Vector3(r * Math.cos(theta), 0, r * Math.sin(theta));
+    v.applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
+    v.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+    return v;
+  }
+
+  for (var i = 0; i < nodeCount; i++){
+    var tilt = THREE.MathUtils.degToRad(22 + i * 7);
+    var yaw = (i / nodeCount) * Math.PI * 2;
+    var phase = (i / nodeCount) * Math.PI * 2;
+
+    // static orbit ring, sampled directly from the same parametric function
+    var ringPts = [];
+    for (var s = 0; s <= 64; s++){
+      ringPts.push(orbitPoint((s / 64) * Math.PI * 2, tilt, yaw, orbitRadius));
+    }
+    var ringGeo = new THREE.BufferGeometry().setFromPoints(ringPts);
+    var ringMat = new THREE.LineBasicMaterial({ color: COLOR_TEAL, transparent: true, opacity: 0.13 });
+    group.add(new THREE.Line(ringGeo, ringMat));
+
+    var nodeGeo = new THREE.OctahedronGeometry(0.3, 0);
+    var nodeMat = new THREE.MeshBasicMaterial({ color: COLOR_TEAL, wireframe: true, transparent: true, opacity: 0.75 });
+    var mesh = new THREE.Mesh(nodeGeo, nodeMat);
+    group.add(mesh);
+
+    var glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: tealTex, transparent: true, opacity: 0.3, depthWrite:false }));
+    glow.scale.set(1.4, 1.4, 1);
+    group.add(glow);
+
+    // settlement line from this node to the core, rebuilt every frame as the node moves
+    var lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()]);
+    var lineMat = new THREE.LineBasicMaterial({ color: COLOR_TEAL, transparent: true, opacity: 0.16 });
+    var line = new THREE.Line(lineGeo, lineMat);
+    group.add(line);
+
+    nodes.push({
+      rail: RAILS[i],
+      tilt: tilt, yaw: yaw, phase: phase,
+      mesh: mesh, glow: glow, line: line,
+      curve: new THREE.QuadraticBezierCurve3(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()),
+      pos: new THREE.Vector3()
+    });
+  }
+
+  // ---- settlement packets: launched on a fixed schedule, travel node -> core ----
+  var packetsPerNode = 3;
+  var packetPeriod = 2.4; // seconds for one packet to complete node -> core
+  var packets = [];
+  nodes.forEach(function(n, ni){
+    for (var p = 0; p < packetsPerNode; p++){
+      var head = new THREE.Sprite(new THREE.SpriteMaterial({ map: p % 2 === 0 ? tealTex : goldTex, transparent: true, opacity: 0.9, depthWrite: false }));
+      head.scale.set(0.3, 0.3, 1);
+      group.add(head);
+      packets.push({
+        node: n,
+        // evenly staggered phase so packets leave each node like a metronome, not at random
+        phase: (p / packetsPerNode) + (ni * 0.5 / nodeCount),
+        head: head
+      });
+    }
+  });
+
+  // ---- data-surface grid: a plane displaced by a travelling sine wave, z = A sin(kx - wt) ----
+  var gridSegX = 36, gridSegZ = 20;
+  var gridGeo = new THREE.PlaneGeometry(24, 13, gridSegX, gridSegZ);
+  gridGeo.rotateX(-Math.PI / 2);
+  var gridMat = new THREE.MeshBasicMaterial({ color: COLOR_TEAL, wireframe: true, transparent: true, opacity: 0.06 });
+  var grid = new THREE.Mesh(gridGeo, gridMat);
+  grid.position.y = -4.6;
+  grid.position.z = -1;
+  scene.add(grid);
+  var gridBase = gridGeo.attributes.position.array.slice();
+
+  scene.add(group);
+
+  // ---- mouse parallax, kept small for a precise-instrument feel ----
+  var mouseX = 0, mouseY = 0, targetRotY = 0, targetRotX = 0;
+  window.addEventListener('mousemove', function(e){
+    mouseX = (e.clientX / window.innerWidth) - 0.5;
+    mouseY = (e.clientY / window.innerHeight) - 0.5;
+  });
+
+  function onResize(){
+    var w = mount.clientWidth, h = mount.clientHeight;
+    if (!w || !h) return;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }
+  window.addEventListener('resize', onResize);
+
+  var clock = new THREE.Clock();
+  var elapsed = 0;
+
+  function easeInOutCubic(x){
+    return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  }
+  var entranceDuration = reduceMotion ? 0.4 : 0.9;
+
+  var CENTER = new THREE.Vector3(0, 0, 0);
+
+  // pause the loop while the hero is scrolled out of view — no wasted frames
+  var visible = true;
+  if ('IntersectionObserver' in window){
+    new IntersectionObserver(function(entries){
+      visible = entries[0].isIntersecting;
+    }, { threshold: 0 }).observe(mount);
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    var dt = Math.min(clock.getDelta(), 0.05);
+    if (!visible) return;
+    elapsed += dt;
+    var speedMul = reduceMotion ? 0.25 : 1;
+    var t = elapsed * speedMul;
+
+    // entrance: precise cubic scale-in, no overshoot
+    var entranceT = Math.min(elapsed / entranceDuration, 1);
+    group.scale.setScalar(Math.max(0.001, easeInOutCubic(entranceT)));
+
+    core.rotation.y += dt * 0.35 * speedMul;
+    core.rotation.x += dt * 0.16 * speedMul;
+    var corePulse = 1 + Math.sin(t * 1.6) * 0.035;
+    core.scale.setScalar(corePulse);
+    coreGlow.scale.setScalar(4.2 * (1 + Math.sin(t * 1.6) * 0.06));
+
+    shell.rotation.y -= dt * 0.03 * speedMul;
+
+    nodes.forEach(function(n){
+      var theta = n.phase + t * omega;
+      var p = orbitPoint(theta, n.tilt, n.yaw, orbitRadius);
+      n.pos.copy(p);
+      n.mesh.position.copy(p);
+      n.glow.position.copy(p);
+      n.mesh.rotation.y += dt * 0.8 * speedMul;
+      n.mesh.rotation.x += dt * 0.5 * speedMul;
+
+      // settlement line: node -> midpoint (lifted slightly) -> core
+      var mid = p.clone().multiplyScalar(0.5);
+      mid.y += 0.5;
+      n.curve.v0.copy(p);
+      n.curve.v1.copy(mid);
+      n.curve.v2.copy(CENTER);
+      var pts = n.curve.getPoints(24);
+      n.line.geometry.setFromPoints(pts);
+    });
+
+    packets.forEach(function(pk){
+      var pt = (t / packetPeriod + pk.phase) % 1;
+      var pos = pk.node.curve.getPoint(pt);
+      pk.head.position.copy(pos);
+      var fade = Math.sin(pt * Math.PI);
+      pk.head.material.opacity = 0.25 + fade * 0.75;
+      var s = 0.3 * (0.7 + fade * 0.5);
+      pk.head.scale.set(s, s, 1);
+    });
+
+    // travelling sine wave across the floor grid: z = A sin(kx - wt)
+    var posAttr = grid.geometry.attributes.position;
+    var arr = posAttr.array;
+    var k = 0.55, w = 1.1, amp = 0.28;
+    for (var vi = 0; vi < arr.length; vi += 3){
+      var bx = gridBase[vi], bz = gridBase[vi + 2];
+      arr[vi + 1] = Math.sin(k * bx - w * t) * amp * 0.5 + Math.cos(k * bz * 0.7 + w * t * 0.6) * amp * 0.5;
+    }
+    posAttr.needsUpdate = true;
+
+    targetRotY += (mouseX * 0.22 - targetRotY) * 0.05;
+    targetRotX += (mouseY * 0.14 - targetRotX) * 0.05;
+    group.rotation.y = targetRotY;
+    group.rotation.x = targetRotX;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+</script>
+
+<script>
+// ---- scroll reveal: progressive enhancement only, content is visible without JS ----
+(function(){
+  var items = document.querySelectorAll('.reveal');
+  if (!items.length) return;
+  if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    items.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+  items.forEach(function(el){ io.observe(el); });
+})();
+</script>
+
+</body>
+</html>
