@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Prime Fast Pay</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L21 7V17L12 22L3 17V7L12 2Z' fill='%230A0D12' stroke='%23F0B94D' stroke-width='1.4'/%3E%3Cpath d='M12 2V22M3 7L21 17M21 7L3 17' stroke='%232EE6C4' stroke-width='1' opacity='0.6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0D12;
+    --surface:#12171F;
+    --line:#232B37;
+    --text:#E8ECF1;
+    --muted:#8A93A3;
+    --gold:#F0B94D;
+    --teal:#2EE6C4;
+    --display:'Space Grotesk', sans-serif;
+    --body:'Inter', sans-serif;
+    --mono:'JetBrains Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:var(--body);
+    min-height:100vh;
+    display:grid;
+    place-items:center;
+    padding:40px 20px;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  :focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:4px;}
+  .wrap{max-width:560px;text-align:center;}
+  .logo{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--display);font-weight:600;font-size:16px;
+    color:var(--muted);margin-bottom:48px;
+  }
+  .logo svg{width:22px;height:22px;}
+  .code{
+    font-family:var(--mono);font-size:14px;
+    color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;
+    margin-bottom:20px;
+  }
+  h1{
+    font-family:var(--display);font-weight:600;
+    font-size:clamp(40px,7vw,72px);line-height:1.05;letter-spacing:-0.02em;
+    margin-bottom:18px;
+  }
+  h1 .accent{color:var(--gold);}
+  p{color:var(--muted);font-size:16px;line-height:1.6;margin-bottom:36px;}
+  .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+  .btn{
+    font-family:var(--body);font-size:14px;font-weight:600;
+    padding:12px 24px;border-radius:999px;
+    border:1px solid var(--line);background:transparent;color:var(--text);
+    transition:border-color .18s ease,transform .12s ease;
+  }
+  .btn:hover{border-color:var(--teal);transform:translateY(-1px);}
+  .btn-primary{background:var(--gold);color:var(--ink);border-color:var(--gold);}
+  .btn-primary:hover{background:#f5c66a;border-color:#f5c66a;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="logo">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2L21 7V17L12 22L3 17V7L12 2Z" stroke="#F0B94D" stroke-width="1.4"/>
+        <path d="M12 2V22M3 7L21 17M21 7L3 17" stroke="#2EE6C4" stroke-width="1" opacity="0.6"/>
+      </svg>
+      Prime Fast Pay
+    </a>
+    <div class="code">404 / off the rail</div>
+    <h1>That page <span class="accent">isn't on the network.</span></h1>
+    <p>The link is broken, the page moved, or it never existed. Head back to the landing or jump to the docs.</p>
+    <div class="actions">
+      <a href="index.html" class="btn btn-primary">Back to home</a>
+      <a href="docs.html" class="btn">Read the docs</a>
+    </div>
+  </div>
+</body>
+</html>
