@@ -13,6 +13,7 @@ Source pages:
 ## Prime Fast Pay — Main Landing Page
 
 Prime Fast Pay — Money moves at AI Agent speed
+Skip to content
 Prime Fast Pay
 Agents
 Rails
@@ -128,17 +129,17 @@ Cards
 Prime Fast Pay
 Recipient
 POST /v1/payouts
-RailSpeedIndicative feeCoverage
-ACH (Standard & Same-Day)1–2 business days$0.25United States
-RTPSeconds, 24/7$0.50United States
-FedNowSeconds, 24/7$0.50United States
-Push-to-CardMinutes1.5% of amountUS, CA, UK
-Virtual Card IssuanceInstant$1.00US, CA
-Digital Check1–3 business days$0.50United States
-International Wire (SWIFT)Same day$15.00160+ countries
-SEPA SCTNext business day€0.20SEPA zone
-SEPA InstantSeconds, 24/7€0.30SEPA zone
-● gold marker = settles in seconds, 24/7 · fees indicative, corridor pricing on request
+RailSpeedCoverage
+ACH (Standard & Same-Day)1–2 business daysUnited States
+RTPSeconds, 24/7United States
+FedNowSeconds, 24/7United States
+Push-to-CardMinutesUS, CA, UK
+Virtual Card IssuanceInstantUS, CA
+Digital Check1–3 business daysUnited States
+International Wire (SWIFT)Same day160+ countries
+SEPA SCTNext business daySEPA zone
+SEPA InstantSeconds, 24/7SEPA zone
+● gold marker = settles in seconds, 24/7
 Architecture
 ## Three layers, one payout lifecycle.
 Every instruction moves through the same disciplined path — validated, screened, reserved against a ledger, routed, and reconciled — regardless of which rail it lands on, and regardless of whether a human or an agent sent it.
@@ -247,6 +248,25 @@ If your business sends payouts to a distributed base of recipients rather than a
 ## Brokerages & fintechs
 06
 ## Corporate contractor payments
+FAQ
+## Questions teams ask before they switch.
+Eight things we hear on every evaluation call. If yours isn't here, email hello@primefastpay.com.
+## What is Prime Fast Pay?
+Payout infrastructure for AI agents. One REST API that routes across 9 payment rails — ACH, RTP, FedNow, Push-to-Card, Virtual Card, Digital Check, SWIFT wire, SEPA SCT, SEPA Instant — plus a native MCP server so any agent framework can issue payouts as typed tool calls.
+## How fast is payout settlement?
+RTP, FedNow, and SEPA Instant confirm in under 30 seconds at p95, 24/7. Push-to-Card settles in minutes. ACH settles in 1–2 business days. SWIFT wire settles same day. API p95 latency is under 250ms at 5,000 req/s sustained.
+## Which payment rails are supported?
+Nine: ACH (Standard & Same-Day), RTP, FedNow, Push-to-Card, Virtual Card Issuance, Digital Check, International Wire (SWIFT), SEPA SCT, SEPA Instant. Coverage spans the US, Canada, the UK, the SEPA zone, and 160+ countries via SWIFT.
+## Do you support AI agents?
+Yes. A native MCP server exposes every endpoint as a typed tool — works with Claude Agent SDK, LangChain, Google ADK, and CrewAI. Install with cargo install prime-fast-pay-mcp, set your API key, and the agent has create_payout, retrieve_payout, list_payouts, cancel_payout, and recipient tools.
+## Is there a free sandbox?
+Yes. Full API functionality, no card required, most engineers send a first test payout in under an hour. Sandbox keys start with sk_test_ and never move real money. Production keys (sk_live_) follow a short compliance conversation.
+## How do you handle compliance?
+Sanctions, PEP, and velocity screening run on every instruction before funds are reserved — that ordering is enforced by the code path, not documented in a runbook. Merchant funds are segregated and reconciled daily. Every write takes an Idempotency-Key, and every payout lifecycle is preserved as an immutable event.
+## What countries are supported?
+ACH, RTP, FedNow for the United States. Push-to-Card and Virtual Card for US, CA, UK. SEPA SCT and SEPA Instant for the SEPA zone. SWIFT wire for 160+ countries. Nine rails total, all reachable through a single request shape.
+## How do I get started?
+Three steps. Get an API key from the dashboard, create a recipient with bank or card details, POST to /v1/payouts. Sandbox keys issue in minutes. Full reference and code samples are at /docs.html.
 Get started
 ## Send your first payout today.
 Spin up a sandbox in minutes, or talk to our team about your corridors, volume, and rollout. Production access needs a short compliance conversation first.
@@ -266,6 +286,7 @@ Support
 ## PrimePay — Alternate Landing Page
 
 PrimePay — Every rail. One API.
+Skip to content
 PrimePay
 Rails
 Platform
@@ -474,6 +495,7 @@ PrimePay is a payout gateway platform. Outbound disbursements only — no card a
 ## Prime Fast Pay — Developer API Reference
 
 Developer API — Prime Fast Pay
+Skip to content
 Prime Fast Pay
 Home
 API reference

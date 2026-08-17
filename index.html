@@ -529,7 +529,7 @@
   tbody tr{transition:background .15s ease;}
   tbody tr:hover{background:rgba(255,255,255,0.02);}
   td.name{color:var(--text);font-weight:500;}
-  td.speed,td.fee{font-family:var(--mono);color:var(--text);white-space:nowrap;}
+  td.speed{font-family:var(--mono);color:var(--text);white-space:nowrap;}
   .rail-dot{
     display:inline-block;
     width:6px;height:6px;
@@ -1296,23 +1296,23 @@ options = <span class="tok-key">ClaudeAgentOptions</span>(
       <div class="table-scroll">
         <table>
           <thead>
-            <tr><th>Rail</th><th>Speed</th><th>Indicative fee</th><th>Coverage</th></tr>
+            <tr><th>Rail</th><th>Speed</th><th>Coverage</th></tr>
           </thead>
           <tbody>
-            <tr><td class="name"><span class="rail-dot"></span>ACH (Standard &amp; Same-Day)</td><td class="speed">1–2 business days</td><td class="fee">$0.25</td><td>United States</td></tr>
-            <tr><td class="name"><span class="rail-dot instant"></span>RTP</td><td class="speed">Seconds, 24/7</td><td class="fee">$0.50</td><td>United States</td></tr>
-            <tr><td class="name"><span class="rail-dot instant"></span>FedNow</td><td class="speed">Seconds, 24/7</td><td class="fee">$0.50</td><td>United States</td></tr>
-            <tr><td class="name"><span class="rail-dot"></span>Push-to-Card</td><td class="speed">Minutes</td><td class="fee">1.5% of amount</td><td>US, CA, UK</td></tr>
-            <tr><td class="name"><span class="rail-dot instant"></span>Virtual Card Issuance</td><td class="speed">Instant</td><td class="fee">$1.00</td><td>US, CA</td></tr>
-            <tr><td class="name"><span class="rail-dot"></span>Digital Check</td><td class="speed">1–3 business days</td><td class="fee">$0.50</td><td>United States</td></tr>
-            <tr><td class="name"><span class="rail-dot"></span>International Wire (SWIFT)</td><td class="speed">Same day</td><td class="fee">$15.00</td><td>160+ countries</td></tr>
-            <tr><td class="name"><span class="rail-dot"></span>SEPA SCT</td><td class="speed">Next business day</td><td class="fee">€0.20</td><td>SEPA zone</td></tr>
-            <tr><td class="name"><span class="rail-dot instant"></span>SEPA Instant</td><td class="speed">Seconds, 24/7</td><td class="fee">€0.30</td><td>SEPA zone</td></tr>
+            <tr><td class="name"><span class="rail-dot"></span>ACH (Standard &amp; Same-Day)</td><td class="speed">1–2 business days</td><td>United States</td></tr>
+            <tr><td class="name"><span class="rail-dot instant"></span>RTP</td><td class="speed">Seconds, 24/7</td><td>United States</td></tr>
+            <tr><td class="name"><span class="rail-dot instant"></span>FedNow</td><td class="speed">Seconds, 24/7</td><td>United States</td></tr>
+            <tr><td class="name"><span class="rail-dot"></span>Push-to-Card</td><td class="speed">Minutes</td><td>US, CA, UK</td></tr>
+            <tr><td class="name"><span class="rail-dot instant"></span>Virtual Card Issuance</td><td class="speed">Instant</td><td>US, CA</td></tr>
+            <tr><td class="name"><span class="rail-dot"></span>Digital Check</td><td class="speed">1–3 business days</td><td>United States</td></tr>
+            <tr><td class="name"><span class="rail-dot"></span>International Wire (SWIFT)</td><td class="speed">Same day</td><td>160+ countries</td></tr>
+            <tr><td class="name"><span class="rail-dot"></span>SEPA SCT</td><td class="speed">Next business day</td><td>SEPA zone</td></tr>
+            <tr><td class="name"><span class="rail-dot instant"></span>SEPA Instant</td><td class="speed">Seconds, 24/7</td><td>SEPA zone</td></tr>
           </tbody>
         </table>
       </div>
     </div>
-    <div class="table-note reveal">● gold marker = settles in seconds, 24/7 · fees indicative, corridor pricing on request</div>
+    <div class="table-note reveal">● gold marker = settles in seconds, 24/7</div>
   </div>
 </section>
 
